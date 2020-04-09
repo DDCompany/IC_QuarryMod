@@ -243,10 +243,15 @@ TileEntity.registerPrototype(BlockID.quarry, {
         this.container.setScale("expScale", this.data.exp / 1000);
     },
 
-    energyTick: function (type, src) {
-        this.data.energy += src.get(50000 - this.data.energy);
-    }
+    energyReceive: function (type, amount) {
+        const add = Math.min(amount, this.getEnergyStorage() - this.data.energy);
+        this.data.energy += add;
+        return add;
+    },
 
+    getEnergyStorage: function () {
+        return 50000;
+    }
 });
 
 EnergyTileRegistry.addEnergyTypeForId(BlockID.quarry, EU);

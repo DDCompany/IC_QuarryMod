@@ -8,7 +8,7 @@
       QuarryMod by Dmitriy Medvedev for ModChallenge3
  */
 
-importLib("energylib", "*");
+IMPORT("EnergyNet");
 const EU = EnergyTypeRegistry.assureEnergyType("Eu", 1);
 
 const directions = [

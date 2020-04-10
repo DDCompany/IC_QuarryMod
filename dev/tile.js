@@ -17,7 +17,8 @@ TileEntity.registerPrototype(BlockID.quarry, {
         // Если true в tick произойдёт обновление состояния переключателя
         stateFlag: false,
         // Валидна ли структура карьера
-        isValid: false
+        isValid: false,
+        drop: []
     },
 
     created: function () {
@@ -33,41 +34,29 @@ TileEntity.registerPrototype(BlockID.quarry, {
 
     /**
      * Добавление дропа в буффер
-     * @param items
+     * @param item
      */
-    addItemToStorage: function (items) {
-        for (let index in items) {
-            let item = items[index];
+    addItemToStorage: function (item) {
+        for (let i = 0; i < 15; i++) {
+            let slot = this.container.getSlot("slot" + i);
 
-            if (this.smelt) {
-                let smelted = Recipes.getFurnaceRecipeResult(item[0], item[2]);
+            if (!slot.id) {
+                slot.id = item[0];
+                slot.count = item[1];
+                slot.data = item[2];
 
-                if (smelted)
-                    item = [smelted.id, item[1], smelted.data];
-            }
+                return null;
+            } else if (slot.id === item[0] && slot.data === item[2] && Item.getMaxStack(slot.id) !== slot.count) {
+                let count = Math.min(Item.getMaxStack(slot.id) - slot.count, item[1]);
+                slot.count += count;
 
-            for (let i = 0; i < 15; i++) {
-                let slot = this.container.getSlot("slot" + i);
-
-                if (!slot.id) {
-
-                    slot.id = item[0];
-                    slot.count = item[1];
-                    slot.data = item[2];
-                    break;
-
-                } else if (slot.id === item[0] && slot.data === item[2] && Item.getMaxStack(slot.id) - slot.count !== 0) {
-                    let count = Math.min(Item.getMaxStack(slot.id) - slot.count, item[1]);
-                    slot.count += count;
-
-                    if (count < item[1]) {
-                        this.addItemToStorage([item[0], item[1] - count, item[2]]);
-                    }
-                    break;
-                }
+                if (count < item[1]) {
+                    return [item[0], item[1] - count, item[2]];
+                } else return null;
             }
         }
 
+        return item;
     },
 
     /**
@@ -159,7 +148,19 @@ TileEntity.registerPrototype(BlockID.quarry, {
             this.applyUpgrades();
         }
 
-        if (this.data.isValid && !this.data.complete && this.data.energy > ENERGY_PER_DESTROY + ENERGY_PER_SCAN) {
+        let drop = this.data.drop;
+        if (drop && drop.length > 0) {
+            const items = [];
+            for (let i in drop) {
+                let item = drop[i];
+                item = this.addItemToStorage(item);
+                if (item) {
+                    items.push(item);
+                }
+            }
+
+            drop = this.data.drop = items;
+        } else if (this.data.isValid && !this.data.complete && this.data.energy > ENERGY_PER_DESTROY + ENERGY_PER_SCAN) {
             let slotTool = this.container.getSlot("slotTool");
             let correctTool = this.isCorrectTool(slotTool);
 
@@ -189,18 +190,29 @@ TileEntity.registerPrototype(BlockID.quarry, {
                             y: this.data.digY,
                             z: this.data.digZ
                         };
-                        let drop = Block.getBlockDropViaItem(block, correctTool ? slotTool : {
+                        let dropped = Block.getBlockDropViaItem(block, correctTool ? slotTool : {
                             id: 278,
                             data: 0
                         }, coords);
                         let entities = Entity.getAllInRange(coords, 2, 69);
 
+                        if (this.smelt) {
+                            if (dropped && dropped.length > 0) {
+                                for (let i in dropped) {
+                                    const item = dropped[i];
+                                    const smelted = Recipes.getFurnaceRecipeResult(item[0], item[2]);
+
+                                    if (smelted)
+                                        dropped[i] = [smelted.id, item[1], smelted.data];
+                                }
+
+                                this.data.drop = dropped;
+                            }
+                        }
+
                         if (correctTool)
                             this.damageTool(slotTool);
                         else this.data.energy -= ENERGY_PER_DESTROY;
-
-                        if (drop)
-                            this.addItemToStorage(drop);
 
                         for (let index in entities) {
                             if (this.data.exp >= 1000)
@@ -223,6 +235,8 @@ TileEntity.registerPrototype(BlockID.quarry, {
         if (content) {
             if (invalidTool) {
                 content.elements["text"].text = "Incorrect tool";
+            } else if (drop.length > 0) {
+                content.elements["text"].text = "Not enough space";
             } else if (this.data.isValid) {
                 content.elements["text"].text = "X:" + this.data.digX + " Y:" + this.data.digY + " Z:" + this.data.digZ;
             } else {

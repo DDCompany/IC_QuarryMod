@@ -28,18 +28,17 @@ Block.setBlockMaterial(BlockID.quarryCasing, "stone", 2);
 EU.registerWire(BlockID.quarryCasing);
 
 Callback.addCallback("ItemUse", function (coords, item, block) {
-    if(block.id === BlockID.quarryCasing){
-
+    if (!Entity.getSneaking(Player.get()) && block.id === BlockID.quarryCasing) {
         //Открываем интерфейс соседнего quarry
-        for(let index in directions){
+        for (let index in directions) {
             let dir = directions[index];
             let tile = World.getTileEntity(coords.x + dir[0], coords.y + dir[1], coords.z + dir[2]);
 
-            if(tile && World.getBlockID(coords.x + dir[0], coords.y + dir[1], coords.z + dir[2]) === BlockID.quarry){
+            if (tile && World.getBlockID(coords.x + dir[0], coords.y + dir[1], coords.z + dir[2]) === BlockID.quarry) {
                 tile.container.openAs(gui);
+                Game.prevent();
                 break;
             }
         }
-
     }
 });

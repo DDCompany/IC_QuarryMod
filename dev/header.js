@@ -9,6 +9,7 @@
  */
 
 IMPORT("EnergyNet");
+IMPORT("ChargeItem");
 const EU = EnergyTypeRegistry.assureEnergyType("Eu", 1);
 
 const directions = [

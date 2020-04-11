@@ -190,7 +190,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
             if (this.data.progress) {
                 if (++this.data.progress > this.data.progressMax) {
                     this.data.progress = 0;
-                    alert("break " + this.data.progressMax);
                     let coords = {
                         x: this.data.digX,
                         y: this.data.digY,

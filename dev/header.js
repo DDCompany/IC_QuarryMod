@@ -21,6 +21,6 @@ const directions = [
     [0, 0, 1],
 ];
 
-const ENERGY_PER_SCAN = 100;
-const ENERGY_PER_DESTROY = 20;
+const ENERGY_PER_SCAN = 200;
+const ENERGY_PER_DESTROY = 80;
 

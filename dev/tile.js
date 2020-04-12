@@ -1,3 +1,40 @@
+TileEntity.registerPrototype(BlockID.quarryCasing, {
+    findQuarry: function () {
+        for (let index in directions) {
+            let dir = directions[index];
+            let tile = World.getTileEntity(this.x + dir[0], this.y + dir[1], this.z + dir[2]);
+
+            if (tile && World.getBlockID(this.x + dir[0], this.y + dir[1], this.z + dir[2]) === BlockID.quarry) {
+                this.tile = tile;
+                break;
+            }
+        }
+    },
+
+    tick: function () {
+        if (World.getThreadTime() % 60 === 0 && (!this.tile || this.tile.remove)) {
+            this.findQuarry();
+        }
+    },
+
+    energyReceive: function (type, amount) {
+        if (!this.tile)
+            return 0;
+
+        amount = amount / EnergyTypeRegistry.getValueRatio(type, "Eu");
+        const add = Math.min(amount, this.tile.getEnergyStorage() - this.tile.data.energy);
+        this.tile.data.energy += add;
+        return add;
+    },
+
+    click: function () {
+        if (this.tile)
+            this.tile.container.openAs(gui);
+
+        return false;
+    }
+});
+
 TileEntity.registerPrototype(BlockID.quarry, {
     defaultValues: {
         // Количество энергии в TE
@@ -286,15 +323,11 @@ TileEntity.registerPrototype(BlockID.quarry, {
         }
     },
 
-    energyReceive: function (type, amount) {
-        const add = Math.min(amount, this.getEnergyStorage() - this.data.energy);
-        this.data.energy += add;
-        return add;
-    },
-
     getEnergyStorage: function () {
         return 50000;
     }
 });
 
-EnergyTileRegistry.addEnergyTypeForId(BlockID.quarry, EU);
+for (let i in energyTypes) {
+    EnergyTileRegistry.addEnergyTypeForId(BlockID.quarryCasing, energyTypes[i]);
+}

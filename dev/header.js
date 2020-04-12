@@ -10,7 +10,12 @@
 
 IMPORT("EnergyNet");
 IMPORT("ChargeItem");
-const EU = EnergyTypeRegistry.assureEnergyType("Eu", 1);
+
+const energyTypes = [
+    EnergyTypeRegistry.assureEnergyType("Eu", 1),
+    EnergyTypeRegistry.assureEnergyType("RF", 1 / 4)
+];
+
 
 const directions = [
     [-1, 0, 0],
@@ -21,6 +26,5 @@ const directions = [
     [0, 0, 1],
 ];
 
-const ENERGY_PER_SCAN = 200;
-const ENERGY_PER_DESTROY = 80;
-
+const ENERGY_PER_SCAN = __config__.get("energyPerScan");
+const ENERGY_PER_DESTROY = __config__.get("energyPerDestroy");

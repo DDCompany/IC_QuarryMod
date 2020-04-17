@@ -191,13 +191,11 @@ TileEntity.registerPrototype(BlockID.quarry, {
         casing.tile = this;
         casing.container = this.container;
         this.isValid = this.casings.length === 6;
-        alert(this.casings.length + " " + this.isValid);
     },
 
     removeCasing: function (casing) {
         this.casings.splice(this.casings.indexOf(casing), 1);
         this.isValid = this.casings.length === 6;
-        alert("destroy " + this.casings.length);
     },
 
     /**

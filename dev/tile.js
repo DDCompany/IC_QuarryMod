@@ -322,17 +322,17 @@ TileEntity.registerPrototype(BlockID.quarry, {
                 this.container.setBinding("switch", "state", this.data.whitelist);
 
             if (slotTool.id !== 0 && !correctTool) {
-                content.elements["text"].text = "Incorrect tool";
+                content.elements["text"].text = Translation.translate("Incorrect tool");
             } else if (drop && drop.length > 0) {
-                content.elements["text"].text = "Not enough space";
+                content.elements["text"].text = Translation.translate("Not enough space");
             } else if (this.isValid) {
                 content.elements["text"].text = "X:" + this.data.digX + " Y:" + this.data.digY + " Z:" + this.data.digZ;
             } else {
-                content.elements["text"].text = "Incorrect structure";
+                content.elements["text"].text = Translation.translate("Incorrect structure");
             }
 
-            content.elements["textExp"].text = "Exp: " + this.data.exp;
-            content.elements["textRange"].text = "Range: " + 16 * this.data.territoryModifier;
+            content.elements["textExp"].text = Translation.translate("Exp: ") + this.data.exp;
+            content.elements["textRange"].text = Translation.translate("Range: ") + 16 * this.data.territoryModifier;
 
             this.container.setScale("energyScale", this.data.energy / this.getEnergyStorage());
             this.container.setScale("expScale", this.data.exp / 1000);

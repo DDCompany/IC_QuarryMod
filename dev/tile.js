@@ -1,19 +1,24 @@
-TileEntity.registerPrototype(BlockID.quarryCasing, {
-    findQuarry: function () {
-        for (let index in directions) {
-            let dir = directions[index];
-            let tile = World.getTileEntity(this.x + dir[0], this.y + dir[1], this.z + dir[2]);
+function findNearest(x, y, z, id, func) {
+    for (let index in directions) {
+        let dir = directions[index];
+        let tile = World.getTileEntity(x + dir[0], y + dir[1], z + dir[2]);
 
-            if (tile && World.getBlockID(this.x + dir[0], this.y + dir[1], this.z + dir[2]) === BlockID.quarry) {
-                this.tile = tile;
-                break;
-            }
+        if (tile && World.getBlockID(x + dir[0], y + dir[1], z + dir[2]) === id) {
+            if (func(tile))
+                return;
         }
-    },
+    }
+}
 
-    tick: function () {
-        if (World.getThreadTime() % 60 === 0 && (!this.tile || this.tile.remove)) {
-            this.findQuarry();
+TileEntity.registerPrototype(BlockID.quarryCasing, {
+    init: function () {
+        let self = this;
+        findNearest(this.x, this.y, this.z, BlockID.quarry, function (tile) {
+            self.tile = tile;
+        });
+
+        if (this.tile) {
+            this.tile.addCasing(this);
         }
     },
 
@@ -32,6 +37,12 @@ TileEntity.registerPrototype(BlockID.quarryCasing, {
             this.tile.container.openAs(gui);
 
         return false;
+    },
+
+    destroy: function () {
+        this.container = new UI.Container();
+        if (this.tile)
+            this.tile.removeCasing(this);
     }
 });
 
@@ -53,17 +64,25 @@ TileEntity.registerPrototype(BlockID.quarry, {
         whitelist: false,
         // Если true в tick произойдёт обновление состояния переключателя
         stateFlag: false,
-        // Валидна ли структура карьера
-        isValid: false,
         drop: [],
         progress: 0,
         progressMax: 0
+    },
+    casings: [],
+    isValid: false,
+
+    init: function () {
+        this.casings = [];
     },
 
     created: function () {
         this.data.digY = this.y - 3;
         this.data.digX = this.x - 16 * this.data.territoryModifier;
         this.data.digZ = this.z - 16 * this.data.territoryModifier;
+
+        findNearest(this.x, this.y, this.z, BlockID.quarry, function (tile) {
+            this.addCasing(tile);
+        });
     },
 
     getGuiScreen: function () {
@@ -167,18 +186,18 @@ TileEntity.registerPrototype(BlockID.quarry, {
         }
     },
 
-    /**
-     * Проверка валидности структуры
-     * @returns {boolean}
-     */
-    isValidStructure: function () {
-        for (let index in directions) {
-            let dir = directions[index];
+    addCasing: function (casing) {
+        this.casings.push(casing);
+        casing.tile = this;
+        casing.container = this.container;
+        this.isValid = this.casings.length === 6;
+        alert(this.casings.length + " " + this.isValid);
+    },
 
-            if (World.getBlockID(this.x + dir[0], this.y + dir[1], this.z + dir[2]) !== BlockID.quarryCasing)
-                return false;
-        }
-        return true;
+    removeCasing: function (casing) {
+        this.casings.splice(this.casings.indexOf(casing), 1);
+        this.isValid = this.casings.length === 6;
+        alert("destroy " + this.casings.length);
     },
 
     /**
@@ -206,7 +225,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
         let correctTool = this.isCorrectTool(slotTool);
 
         if (World.getThreadTime() % 60 === 0) {
-            this.data.isValid = this.isValidStructure();
             this.refreshList(); //TODO: refactor
             this.applyUpgrades();
         }
@@ -223,7 +241,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
             }
 
             drop = this.data.drop = items;
-        } else if (World.getThreadTime() % 20 === 0 && this.data.isValid && !this.data.complete && (slotTool.id === 0 ? this.data.energy > ENERGY_PER_DESTROY : correctTool)) {
+        } else if (World.getThreadTime() % 20 === 0 && this.isValid && !this.data.complete && (slotTool.id === 0 ? this.data.energy > ENERGY_PER_DESTROY : correctTool)) {
             if (this.data.progress) {
                 if (++this.data.progress > this.data.progressMax) {
                     this.data.progress = 0;
@@ -309,7 +327,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
                 content.elements["text"].text = "Incorrect tool";
             } else if (drop && drop.length > 0) {
                 content.elements["text"].text = "Not enough space";
-            } else if (this.data.isValid) {
+            } else if (this.isValid) {
                 content.elements["text"].text = "X:" + this.data.digX + " Y:" + this.data.digY + " Z:" + this.data.digZ;
             } else {
                 content.elements["text"].text = "Incorrect structure";
@@ -325,6 +343,23 @@ TileEntity.registerPrototype(BlockID.quarry, {
 
     getEnergyStorage: function () {
         return 50000;
+    },
+
+    destroy: function () {
+        for (let i in this.casings) {
+            this.casings[i].tile = null;
+        }
+    }
+});
+
+StorageInterface.createInterface(BlockID.quarryCasing, {
+    slots: {
+        "slot^0-14": {
+            output: true
+        },
+        "slotTool": {
+            input: true
+        }
     }
 });
 

@@ -33,12 +33,7 @@ const gui = new UI.StandartWindow({
             type: "button", x: 900, y: 240, bitmap: "btn_exp", scale: 3.2, clicker:
                 {
                     onClick: function (container, tileEntity) {
-                        try {
-                            Player.addExperience(tileEntity.data.exp);
-                        } catch (e) {
-                            alert("Если вы видите данное сообщение, то Жека ещё не исправил метод для добавления опыта");
-                            return;
-                        }
+                        Player.addExperience(tileEntity.data.exp);
                         tileEntity.data.exp = 0;
                     }
                 }

@@ -11,6 +11,7 @@
 IMPORT("StorageInterface");
 IMPORT("EnergyNet");
 IMPORT("ChargeItem");
+IMPORT("SoundAPI");
 
 const energyTypes = [
     EnergyTypeRegistry.assureEnergyType("Eu", 1),
@@ -29,3 +30,6 @@ const directions = [
 
 const ENERGY_PER_SCAN = __config__.get("energyPerScan");
 const ENERGY_PER_DESTROY = __config__.get("energyPerDestroy");
+
+const soundClick = new Sound("click.ogg");
+soundClick.setInPlayer();

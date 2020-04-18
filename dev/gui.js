@@ -3,6 +3,7 @@ const FONT = {
     shadow: 0
 };
 
+//From https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
 if (!Object.assign) { //TODO: remove after js update
     Object.defineProperty(Object, 'assign', {
         enumerable: false,
@@ -82,6 +83,7 @@ const gui = new UI.StandartWindow({
             scale: 3.2,
             clicker: {
                 onClick: function (container, tileEntity) {
+                    soundClick.play();
                     Player.addExperience(tileEntity.data.exp);
                     tileEntity.data.exp = 0;
                 }
@@ -99,6 +101,11 @@ const gui = new UI.StandartWindow({
             scale: 2,
             bitmapOffHover: "toggle_off_hover",
             bitmapOnHover: "toggle_on_hover",
+            clicker: {
+                onClick: function () {
+                    soundClick.play();
+                }
+            },
             onNewState: function (state, container) {
                 if (container)
                     container.getParent().data.whitelist = state;
@@ -137,5 +144,4 @@ const gui = new UI.StandartWindow({
         bitmap: "close_button_default",
         bitmap2: "close_button_pressed_light"
     };
-
 }

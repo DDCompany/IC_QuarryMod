@@ -1,11 +1,16 @@
 function findNearest(x, y, z, id, func) {
     for (let index in directions) {
         let dir = directions[index];
-        let tile = World.getTileEntity(x + dir[0], y + dir[1], z + dir[2]);
+        if (World.getBlockID(x + dir[0], y + dir[1], z + dir[2]) === id) {
+            let tile = World.getTileEntity(x + dir[0], y + dir[1], z + dir[2]);
+            if (!tile && TileEntity.getPrototype(id)) {
+                tile = TileEntity.addTileEntity(x, y, z);
+            }
 
-        if (tile && World.getBlockID(x + dir[0], y + dir[1], z + dir[2]) === id) {
-            if (func(tile))
-                return;
+            if (tile) {
+                if (func(tile))
+                    return;
+            }
         }
     }
 }

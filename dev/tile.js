@@ -4,7 +4,7 @@ function findNearest(x, y, z, id, func) {
         if (World.getBlockID(x + dir[0], y + dir[1], z + dir[2]) === id) {
             let tile = World.getTileEntity(x + dir[0], y + dir[1], z + dir[2]);
             if (!tile && TileEntity.getPrototype(id)) {
-                tile = TileEntity.addTileEntity(x, y, z);
+                tile = TileEntity.addTileEntity(x + dir[0], y + dir[1], z + dir[2]);
             }
 
             if (tile) {
@@ -16,17 +16,6 @@ function findNearest(x, y, z, id, func) {
 }
 
 TileEntity.registerPrototype(BlockID.quarryCasing, {
-    init: function () {
-        let self = this;
-        findNearest(this.x, this.y, this.z, BlockID.quarry, function (tile) {
-            self.tile = tile;
-        });
-
-        if (this.tile) {
-            this.tile.addCasing(this);
-        }
-    },
-
     energyReceive: function (type, amount) {
         if (!this.tile)
             return 0;
@@ -71,10 +60,11 @@ TileEntity.registerPrototype(BlockID.quarry, {
         stateFlag: false,
         drop: [],
         progress: 0,
-        progressMax: 0
+        progressMax: 0,
+        //Структура построена верно?
+        isValid: false
     },
     casings: [],
-    isValid: false,
 
     init: function () {
         this.casings = [];
@@ -84,10 +74,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
         this.data.digY = this.y - 3;
         this.data.digX = this.x - 16 * this.data.territoryModifier;
         this.data.digZ = this.z - 16 * this.data.territoryModifier;
-
-        findNearest(this.x, this.y, this.z, BlockID.quarry, function (tile) {
-            this.addCasing(tile);
-        });
     },
 
     getGuiScreen: function () {
@@ -195,12 +181,10 @@ TileEntity.registerPrototype(BlockID.quarry, {
         this.casings.push(casing);
         casing.tile = this;
         casing.container = this.container;
-        this.isValid = this.casings.length === 6;
     },
 
     removeCasing: function (casing) {
         this.casings.splice(this.casings.indexOf(casing), 1);
-        this.isValid = this.casings.length === 6;
     },
 
     /**
@@ -222,12 +206,35 @@ TileEntity.registerPrototype(BlockID.quarry, {
         } else return !this.data.list[block.id + ":" + block.data];
     },
 
+    checkStructure: function () {
+        for (let i = this.casings.length - 1; i >= 0; i--) {
+            let casing = this.casings[i];
+            if (casing.remove) {
+                this.removeCasing(casing);
+            }
+        }
+
+        if (this.casings.length < 6) {
+            let self = this;
+            findNearest(this.x, this.y, this.z, BlockID.quarryCasing, function (tile) {
+                if (!tile.tile) {
+                    self.addCasing(tile);
+                }
+
+                return self.casings.length >= 6;
+            });
+        }
+
+        this.data.isValid = this.casings.length === 6;
+    },
+
     tick: function () {
         const content = this.container.getGuiContent();
         let slotTool = this.container.getSlot("slotTool");
         let correctTool = this.isCorrectTool(slotTool);
 
         if (World.getThreadTime() % 60 === 0) {
+            this.checkStructure();
             this.refreshList(); //TODO: refactor
             this.applyUpgrades();
         }
@@ -244,7 +251,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
             }
 
             drop = this.data.drop = items;
-        } else if (World.getThreadTime() % 20 === 0 && this.isValid && !this.data.complete && (slotTool.id === 0 ? this.data.energy > ENERGY_PER_DESTROY : correctTool)) {
+        } else if (World.getThreadTime() % 20 === 0 && this.data.isValid && !this.data.complete && (slotTool.id === 0 ? this.data.energy > ENERGY_PER_DESTROY : correctTool)) {
             if (this.data.progress) {
                 if (++this.data.progress > this.data.progressMax) {
                     this.data.progress = 0;
@@ -330,7 +337,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
                 content.elements["text"].text = Translation.translate("Incorrect tool");
             } else if (drop && drop.length > 0) {
                 content.elements["text"].text = Translation.translate("Not enough space");
-            } else if (this.isValid) {
+            } else if (this.data.isValid) {
                 content.elements["text"].text = "X:" + this.data.digX + " Y:" + this.data.digY + " Z:" + this.data.digZ;
             } else {
                 content.elements["text"].text = Translation.translate("Incorrect structure");

@@ -112,21 +112,24 @@ TileEntity.registerPrototype(BlockID.quarry, {
      * Применение модификаторов апгрейдов и линз
      */
     applyUpgrades: function () {
-        this.data.territoryModifier = 1;
-        this.smelt = false;
+        let territoryModifier = 1;
+        let smelt = false;
 
         for (let i = 0; i < 2; i++) {
             let slotUpgrade = this.container.getSlot("slotUpgrade" + i);
             let slotLens = this.container.getSlot("slotLens" + i);
 
             if (slotUpgrade.id === ItemID.quarryUpgradeTerritory) {
-                this.data.territoryModifier *= 2;
+                territoryModifier *= 2;
             }
 
             if (slotLens.id === ItemID.quarryLensSmelt) {
-                this.smelt = true;
+                smelt = true;
             }
         }
+
+        this.data.territoryModifier = territoryModifier;
+        this.smelt = smelt;
     },
 
     /**

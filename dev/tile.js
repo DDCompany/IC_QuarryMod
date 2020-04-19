@@ -362,7 +362,9 @@ TileEntity.registerPrototype(BlockID.quarry, {
 
     destroy: function () {
         for (let i in this.casings) {
-            this.casings[i].tile = null;
+            let casing = this.casings[i];
+            casing.tile = null;
+            casing.container = new UI.Container();
         }
     }
 });

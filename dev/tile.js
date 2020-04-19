@@ -336,18 +336,20 @@ TileEntity.registerPrototype(BlockID.quarry, {
             if (this.data.stateFlag)
                 this.container.setBinding("switch", "state", this.data.whitelist);
 
+            let elementText = content.elements["text"];
+
             if (slotTool.id !== 0 && !correctTool) {
-                content.elements["text"].text = Translation.translate("Incorrect tool");
+                elementText.text = Translation.translate("Incorrect tool")
             } else if (drop && drop.length > 0) {
-                content.elements["text"].text = Translation.translate("Not enough space");
+                elementText.text = Translation.translate("Not enough space");
             } else if (this.data.isValid) {
-                content.elements["text"].text = "X:" + this.data.digX + " Y:" + this.data.digY + " Z:" + this.data.digZ;
+                elementText.text = "X:" + this.data.digX + " Y:" + this.data.digY + " Z:" + this.data.digZ;
             } else {
-                content.elements["text"].text = Translation.translate("Incorrect structure");
+                elementText.text = Translation.translate("Incorrect structure");
             }
 
             content.elements["textExp"].text = Translation.translate("Exp: ") + this.data.exp;
-            content.elements["textRange"].text = Translation.translate("Range: ") + 16 * this.data.territoryModifier;
+            elementText.text += "\n\n" + Translation.translate("Range: ") + 16 * this.data.territoryModifier;
 
             this.container.setScale("energyScale", this.data.energy / this.getEnergyStorage());
             this.container.setScale("expScale", this.data.exp / 1000);

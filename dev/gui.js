@@ -90,8 +90,15 @@ const gui = new UI.StandartWindow({
             }
         },
 
-        "text": {type: "text", x: 390, y: 320, width: 100, height: 20, text: "", font: FONT},
-        "textRange": {type: "text", x: 390, y: 360, width: 100, height: 20, text: "", font: FONT},
+        "text": {
+            type: "text",
+            x: 390,
+            y: 320,
+            text: "",
+            font: FONT,
+            format: true,
+            multiline: true
+        },
         "textExp": {type: "text", x: 595, y: 250, width: 100, height: 30, text: "", font: FONT},
 
         "switch": {

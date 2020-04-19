@@ -99,7 +99,7 @@ const gui = new UI.StandartWindow({
             format: true,
             multiline: true
         },
-        "textExp": {type: "text", x: 595, y: 250, width: 100, height: 30, text: "", font: FONT},
+        "textExp": {type: "text", x: 595, y: 250, text: "", font: FONT},
 
         "switch": {
             type: "switch",

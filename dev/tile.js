@@ -30,7 +30,7 @@ TileEntity.registerPrototype(BlockID.quarryCasing, {
         if (this.tile)
             this.tile.container.openAs(gui);
 
-        return false;
+        return true;
     },
 
     destroy: function () {

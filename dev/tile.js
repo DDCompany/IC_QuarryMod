@@ -34,7 +34,6 @@ TileEntity.registerPrototype(BlockID.quarryCasing, {
     },
 
     destroy: function () {
-        this.container = new UI.Container();
         if (this.tile)
             this.tile.removeCasing(this);
     }
@@ -183,7 +182,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
     addCasing: function (casing) {
         this.casings.push(casing);
         casing.tile = this;
-        casing.container = this.container;
     },
 
     removeCasing: function (casing) {
@@ -364,18 +362,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
         for (let i in this.casings) {
             let casing = this.casings[i];
             casing.tile = null;
-            casing.container = new UI.Container();
-        }
-    }
-});
-
-StorageInterface.createInterface(BlockID.quarryCasing, {
-    slots: {
-        "slot^0-14": {
-            output: true
-        },
-        "slotTool": {
-            input: true
         }
     }
 });

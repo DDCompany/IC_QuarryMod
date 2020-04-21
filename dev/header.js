@@ -8,7 +8,6 @@
       QuarryMod by Dmitriy Medvedev for ModChallenge3
  */
 
-IMPORT("StorageInterface");
 IMPORT("EnergyNet");
 IMPORT("ChargeItem");
 IMPORT("SoundAPI");

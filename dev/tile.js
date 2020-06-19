@@ -156,8 +156,8 @@ TileEntity.registerPrototype(BlockID.quarry, {
      * @param slotTool
      */
     damageTool: function (slotTool) {
-        const changeData = ChargeItemRegistry.getItemData(slotTool.id);
-        if (changeData) {
+        const chargeData = ChargeItemRegistry.getItemData(slotTool.id);
+        if (chargeData) {
             let consume = ToolAPI.getToolData(slotTool.id).toolMaterial.energyPerUse;
             const energy = Math.min(this.data.energy, consume);
 

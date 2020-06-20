@@ -75,8 +75,8 @@ TileEntity.registerPrototype(BlockID.quarry, {
 
     created: function () {
         this.data.digY = this.y - 3;
-        this.data.digX = this.x - 16 * this.data.territoryModifier;
-        this.data.digZ = this.z - 16 * this.data.territoryModifier;
+        this.data.digX = this.x - 8 * this.data.territoryModifier;
+        this.data.digZ = this.z - 8 * this.data.territoryModifier;
     },
 
     getGuiScreen: function () {

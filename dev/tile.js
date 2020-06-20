@@ -43,6 +43,8 @@ TileEntity.registerPrototype(BlockID.quarryCasing, {
 
 TileEntity.registerPrototype(BlockID.quarry, {
     defaultValues: {
+        // Карьер включен?
+        enabled: false,
         // Количество энергии в TE
         energy: 0,
         // Количество опыта
@@ -57,8 +59,8 @@ TileEntity.registerPrototype(BlockID.quarry, {
         complete: false,
         // Включён белый список?
         whitelist: false,
-        // Если true в tick произойдёт обновление состояния переключателя
-        stateFlag: false,
+        // Если true в tick произойдёт обновление состояния переключателя и кнопки включения
+        updateFlag: false,
         drop: [],
         progress: 0,
         progressMax: 0,
@@ -78,8 +80,13 @@ TileEntity.registerPrototype(BlockID.quarry, {
     },
 
     getGuiScreen: function () {
-        this.data.stateFlag = true;
+        this.data.updateFlag = true;
         return gui;
+    },
+
+    toggleEnable: function () {
+        this.data.enabled = !this.data.enabled;
+        this.data.updateFlag = true;
     },
 
     /**
@@ -234,7 +241,8 @@ TileEntity.registerPrototype(BlockID.quarry, {
     tick: function () {
         const content = this.container.getGuiContent();
         let slotTool = this.container.getSlot("slotTool");
-        let correctTool = this.isCorrectTool(slotTool);
+        let correctTool = false;
+        let drop = this.data.drop;
 
         if (World.getThreadTime() % 60 === 0) {
             this.checkStructure();
@@ -242,103 +250,114 @@ TileEntity.registerPrototype(BlockID.quarry, {
             this.applyUpgrades();
         }
 
-        let drop = this.data.drop;
-        if (drop && drop.length > 0) {
-            const items = [];
-            for (let i in drop) {
-                let item = drop[i];
-                item = this.addItemToStorage(item);
-                if (item) {
-                    items.push(item);
-                }
-            }
-
-            drop = this.data.drop = items;
-        } else if (World.getThreadTime() % 20 === 0 && this.data.isValid && !this.data.complete && (slotTool.id === 0 ? this.data.energy > ENERGY_PER_DESTROY : correctTool)) {
-            if (this.data.progress) {
-                if (++this.data.progress > this.data.progressMax) {
-                    this.data.progress = 0;
-                    let coords = {
-                        x: this.data.digX,
-                        y: this.data.digY,
-                        z: this.data.digZ
-                    };
-                    let block = World.getBlock(this.data.digX, this.data.digY, this.data.digZ);
-                    let dropped = Block.getBlockDropViaItem(block, correctTool ? slotTool : {
-                        id: 278,
-                        data: 0
-                    }, coords);
-                    let entities = Entity.getAllInRange(coords, 2, 69);
-
-                    if (this.smelt) {
-                        if (dropped && dropped.length > 0) {
-                            for (let i in dropped) {
-                                const item = dropped[i];
-                                const smelted = Recipes.getFurnaceRecipeResult(item[0], item[2]);
-
-                                if (smelted)
-                                    dropped[i] = [smelted.id, item[1], smelted.data];
-                            }
-                        }
-                    }
-                    this.data.drop = dropped;
-
-                    if (correctTool)
-                        this.damageTool(slotTool);
-                    else this.data.energy -= ENERGY_PER_DESTROY;
-
-                    for (let index in entities) {
-                        if (this.data.exp >= 1000)
-                            break;
-
-                        this.data.exp = Math.min(1000, this.data.exp + 2);
-                        Entity.remove(entities[index]);
-                    }
-
-                    World.setBlock(this.data.digX, this.data.digY, this.data.digZ, 3);
-                }
-            } else if (this.data.energy >= ENERGY_PER_SCAN) {
-                let range = 16 * this.data.territoryModifier;
-
-                //Increase dig position
-                if (++this.data.digX > this.x + range) {
-                    this.data.digX = this.x - range;
-                    if (++this.data.digZ > this.z + range) {
-                        this.data.digZ = this.z - range;
-                        if (--this.data.digY < 1) {
-                            this.data.complete = true;
-                        }
+        if (this.data.enabled) {
+            correctTool = this.isCorrectTool(slotTool);
+            if (drop && drop.length > 0) {
+                const items = [];
+                for (let i in drop) {
+                    let item = drop[i];
+                    item = this.addItemToStorage(item);
+                    if (item) {
+                        items.push(item);
                     }
                 }
-                //Consume energy
-                this.data.energy -= ENERGY_PER_SCAN;
 
-                let block = World.getBlock(this.data.digX, this.data.digY, this.data.digZ);
-                if (block.id > 0) {
-                    let material = ToolAPI.getBlockMaterial(block.id);
-                    if (material && material.name === "stone" && this.isOnTheList(block)) {
-                        const coords = {
+                drop = this.data.drop = items;
+            } else if (World.getThreadTime() % 20 === 0
+                && this.data.isValid
+                && !this.data.complete
+                && (slotTool.id === 0 ? this.data.energy > ENERGY_PER_DESTROY : correctTool)) {
+
+                if (this.data.progress) {
+                    if (++this.data.progress > this.data.progressMax) {
+                        this.data.progress = 0;
+                        let coords = {
                             x: this.data.digX,
                             y: this.data.digY,
                             z: this.data.digZ
                         };
-                        this.data.progress = 1;
-                        this.data.progressMax = Math.round(ToolAPI.getDestroyTimeViaTool(block, slotTool || {
+                        let block = World.getBlock(this.data.digX, this.data.digY, this.data.digZ);
+                        let dropped = Block.getBlockDropViaItem(block, correctTool ? slotTool : {
                             id: 278,
                             data: 0
-                        }, coords, false) * 3);
+                        }, coords);
+                        let entities = Entity.getAllInRange(coords, 2, 69);
+
+                        if (this.smelt) {
+                            if (dropped && dropped.length > 0) {
+                                for (let i in dropped) {
+                                    const item = dropped[i];
+                                    const smelted = Recipes.getFurnaceRecipeResult(item[0], item[2]);
+
+                                    if (smelted)
+                                        dropped[i] = [smelted.id, item[1], smelted.data];
+                                }
+                            }
+                        }
+                        this.data.drop = dropped;
+
+                        if (correctTool)
+                            this.damageTool(slotTool);
+                        else this.data.energy -= ENERGY_PER_DESTROY;
+
+                        for (let index in entities) {
+                            if (this.data.exp >= 1000)
+                                break;
+
+                            this.data.exp = Math.min(1000, this.data.exp + 2);
+                            Entity.remove(entities[index]);
+                        }
+
+                        World.setBlock(this.data.digX, this.data.digY, this.data.digZ, 3);
+                    }
+                } else if (this.data.energy >= ENERGY_PER_SCAN) {
+                    let range = 16 * this.data.territoryModifier;
+
+                    //Increase dig position
+                    if (++this.data.digX > this.x + range) {
+                        this.data.digX = this.x - range;
+                        if (++this.data.digZ > this.z + range) {
+                            this.data.digZ = this.z - range;
+                            if (--this.data.digY < 1) {
+                                this.data.complete = true;
+                            }
+                        }
+                    }
+                    //Consume energy
+                    this.data.energy -= ENERGY_PER_SCAN;
+
+                    let block = World.getBlock(this.data.digX, this.data.digY, this.data.digZ);
+                    if (block.id > 0) {
+                        let material = ToolAPI.getBlockMaterial(block.id);
+                        if (material && material.name === "stone" && this.isOnTheList(block)) {
+                            const coords = {
+                                x: this.data.digX,
+                                y: this.data.digY,
+                                z: this.data.digZ
+                            };
+                            this.data.progress = 1;
+                            this.data.progressMax = Math.round(ToolAPI.getDestroyTimeViaTool(block, slotTool || {
+                                id: 278,
+                                data: 0
+                            }, coords, false) * 3);
+                        }
                     }
                 }
             }
         }
 
         if (content) {
-            if (this.data.stateFlag)
+            if (this.data.updateFlag) {
                 this.container.setBinding("switch", "state", this.data.whitelist);
+                content.elements["buttonToggle"].bitmap = this.data.enabled ? "btn_redstone_on" : "btn_redstone_off"
+                this.data.updateFlag = false;
+            }
 
             let elementText = content.elements["text"];
 
-            if (slotTool.id !== 0 && !correctTool) {
+            if (!this.data.enabled) {
+                elementText.text = Translation.translate("Turned off")
+            } else if (slotTool.id !== 0 && !correctTool) {
                 elementText.text = Translation.translate("Incorrect tool")
             } else if (drop && drop.length > 0) {
                 elementText.text = Translation.translate("Not enough space");

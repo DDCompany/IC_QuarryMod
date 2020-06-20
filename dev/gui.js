@@ -34,9 +34,9 @@ const gui = new UI.StandartWindow({
         "slotLens0": {type: "slot", x: 470, y: 240, bitmap: "slot_lens"},
         "slotLens1": {type: "slot", x: 530, y: 240, bitmap: "slot_lens"},
 
-        "button": {
+        "buttonGetExp": {
             type: "button",
-            x: 900,
+            x: 830,
             y: 240,
             bitmap: "btn_exp",
             bitmap2: "btn_exp_pressed",
@@ -46,6 +46,20 @@ const gui = new UI.StandartWindow({
                     soundClick.play();
                     Player.addExperience(tileEntity.data.exp);
                     tileEntity.data.exp = 0;
+                }
+            }
+        },
+
+        "buttonToggle": {
+            type: "button",
+            x: 900,
+            y: 240,
+            bitmap: "btn_redstone_off",
+            scale: 3.2,
+            clicker: {
+                onClick: function (container, tileEntity) {
+                    soundClick.play();
+                    tileEntity.toggleEnable()
                 }
             }
         },

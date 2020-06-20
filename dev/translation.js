@@ -7,3 +7,4 @@ Translation.addTranslation("Exp: ", {ru: "Опыт: ", zh: "经验"});
 Translation.addTranslation("Incorrect tool", {ru: "Неверный инструмент", zh: "错误的工具"});
 Translation.addTranslation("Not enough space", {ru: "Недостаточно места", zh: "范围大小不足"});
 Translation.addTranslation("Incorrect structure", {ru: "Неверное строение", zh: "错误的结构"});
+Translation.addTranslation("Turned off", {ru: "Выключено"});

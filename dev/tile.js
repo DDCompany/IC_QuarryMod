@@ -28,7 +28,7 @@ TileEntity.registerPrototype(BlockID.quarryCasing, {
 
     click: function () {
         if (this.tile && !Entity.getSneaking(Player.get())) {
-            this.tile.container.openAs(gui);
+            this.tile.container.openAs(this.tile.getGuiScreen());
             return true;
         }
 

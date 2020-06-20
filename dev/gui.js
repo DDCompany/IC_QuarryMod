@@ -3,58 +3,18 @@ const FONT = {
     shadow: 0
 };
 
-//From https://developer.mozilla.org/ru/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
-if (!Object.assign) { //TODO: remove after js update
-    Object.defineProperty(Object, 'assign', {
-        enumerable: false,
-        configurable: true,
-        writable: true,
-        value: function (target, firstSource) {
-            'use strict';
-            if (target === undefined || target === null) {
-                throw new TypeError('Cannot convert first argument to object');
-            }
-
-            var to = Object(target);
-            for (var i = 1; i < arguments.length; i++) {
-                var nextSource = arguments[i];
-                if (nextSource === undefined || nextSource === null) {
-                    continue;
-                }
-
-                var keysArray = Object.keys(Object(nextSource));
-                for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
-                    var nextKey = keysArray[nextIndex];
-                    var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
-                    if (desc !== undefined && desc.enumerable) {
-                        to[nextKey] = nextSource[nextKey];
-                    }
-                }
-            }
-            return to;
-        }
-    });
-}
-
 const gui = new UI.StandartWindow({
     standart: {
         header: {
             text: {
                 text: "Quarry",
-                font: Object.assign({}, FONT) //Because horizon add default properties
-            },
-            frame: "background_panel",
-            color: android.graphics.Color.rgb(1, 1, 1),
-            hideButton: true
+            }
         },
         inventory: {
             standart: true
         },
         background: {
-            frame: {
-                scale: "background_panel", //Horizon bug //TODO: remove after fix
-                bitmap: "background_panel",
-            }
+            standart: true
         }
     },
     drawing: [
@@ -135,20 +95,4 @@ const gui = new UI.StandartWindow({
             content["slotList" + (i * 2 + k)] = {type: "slot", x: 790 + i * 60, y: 100 + k * 60};
         }
     }
-
-    //Set CLASSIC style to window
-    const clazz = java.lang.Class.forName("zhekasmirnov.launcher.api.mod.ui.types.UIStyle", true, gui.getClass().getClassLoader());
-    const field = clazz.getField("CLASSIC");
-    field.setAccessible(true);
-    gui.setStyle(field.get(null));
-
-    //Add close button
-    gui.getWindow("header").getContentProvider().content.elements["default-close-button"] = {
-        type: "closeButton",
-        scale: 80 / 18 * 0.75, // Copies from InnerCore
-        x: 994.0 - 80 * 0.75,  //
-        y: 15,
-        bitmap: "close_button_default",
-        bitmap2: "close_button_pressed_light"
-    };
 }

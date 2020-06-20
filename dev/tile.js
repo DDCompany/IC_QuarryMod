@@ -27,10 +27,12 @@ TileEntity.registerPrototype(BlockID.quarryCasing, {
     },
 
     click: function () {
-        if (this.tile)
+        if (this.tile && !Entity.getSneaking(Player.get())) {
             this.tile.container.openAs(gui);
+            return true;
+        }
 
-        return true;
+        return false;
     },
 
     destroy: function () {

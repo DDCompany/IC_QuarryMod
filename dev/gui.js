@@ -7,7 +7,7 @@ const gui = new UI.StandartWindow({
     standart: {
         header: {
             text: {
-                text: "Quarry",
+                text: "",
             }
         },
         inventory: {
@@ -133,3 +133,11 @@ const gui = new UI.StandartWindow({
         }
     }
 }
+
+Callback.addCallback("LevelLoaded", function () {
+    let header = gui.getWindow("header");
+    let drawing = header.contentProvider.drawing[2];
+    if (drawing) {
+        drawing.text = Translation.translate("Quarry");
+    }
+});

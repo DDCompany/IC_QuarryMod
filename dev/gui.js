@@ -20,8 +20,8 @@ const gui = new UI.StandartWindow({
     drawing: [
         {type: "bitmap", x: 400, y: 120, bitmap: "energy_small_background", scale: 3.2},
         {type: "bitmap", x: 595, y: 280, bitmap: "exp_bar", scale: 3.2},
-        {type: "text", text: "BL", x: 815, y: 80, font: FONT},
-        {type: "text", text: "WL", x: 915, y: 80, font: FONT},
+        {type: "text", text: "BL", x: 815, y: 75, font: FONT},
+        {type: "text", text: "WL", x: 915, y: 75, font: FONT},
     ],
     elements: {
         "energyScale": {type: "scale", x: 400, y: 120, direction: 1, bitmap: "energy_small_scale", scale: 3.2},
@@ -93,8 +93,8 @@ const gui = new UI.StandartWindow({
 
         "switch": {
             type: "switch",
-            x: 853,
-            y: 58,
+            x: 850,
+            y: 52,
             scale: 2,
             bitmapOffHover: "toggle_off_hover",
             bitmapOnHover: "toggle_on_hover",

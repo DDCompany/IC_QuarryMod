@@ -333,7 +333,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
                     let block = World.getBlock(this.data.digX, this.data.digY, this.data.digZ);
                     if (block.id > 0) {
                         let material = ToolAPI.getBlockMaterial(block.id);
-                        if (material && material.name === "stone" && this.isOnTheList(block)) {
+                        if (material && material.name === "stone" && this.isOnTheList(block) && !TileEntity.getPrototype(block.id)) {
                             const coords = {
                                 x: this.data.digX,
                                 y: this.data.digY,

@@ -28,11 +28,27 @@ const gui = new UI.StandartWindow({
         "expScale": {type: "scale", x: 595, y: 280, bitmap: "exp_bar_full", scale: 3.2},
         "slotTool": {type: "slot", x: 390, y: 40},
 
-        "slotUpgrade0": {type: "slot", x: 390, y: 180, bitmap: "slot_upgrade"},
-        "slotUpgrade1": {type: "slot", x: 390, y: 240, bitmap: "slot_upgrade"},
+        "slotUpgrade0": {
+            type: "slot", x: 390, y: 180, bitmap: "slot_upgrade", onItemChanged: function () {
+                gui.getContainer().getParent().onUpgradeChanged()
+            }
+        },
+        "slotUpgrade1": {
+            type: "slot", x: 390, y: 240, bitmap: "slot_upgrade", onItemChanged: function () {
+                gui.getContainer().getParent().onUpgradeChanged()
+            }
+        },
 
-        "slotLens0": {type: "slot", x: 470, y: 240, bitmap: "slot_lens"},
-        "slotLens1": {type: "slot", x: 530, y: 240, bitmap: "slot_lens"},
+        "slotLens0": {
+            type: "slot", x: 470, y: 240, bitmap: "slot_lens", onItemChanged: function () {
+                gui.getContainer().getParent().onLensChanged()
+            }
+        },
+        "slotLens1": {
+            type: "slot", x: 530, y: 240, bitmap: "slot_lens", onItemChanged: function () {
+                gui.getContainer().getParent().onLensChanged()
+            }
+        },
 
         "buttonGetExp": {
             type: "button",
@@ -106,7 +122,14 @@ const gui = new UI.StandartWindow({
 
     for (let i = 0; i < 3; i++) {
         for (let k = 0; k < 2; k++) {
-            content["slotList" + (i * 2 + k)] = {type: "slot", x: 790 + i * 60, y: 100 + k * 60};
+            let slotId = i * 2 + k;
+            content["slotList" + slotId] = {
+                type: "slot", x: 790 + i * 60, y: 100 + k * 60, onItemChanged: function (container, id, count, data) {
+                    if (count > -1) {
+                        container.getParent().onListChanged(slotId, id, data);
+                    }
+                }
+            };
         }
     }
 }

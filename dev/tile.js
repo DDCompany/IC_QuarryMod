@@ -65,7 +65,9 @@ TileEntity.registerPrototype(BlockID.quarry, {
         progress: 0,
         progressMax: 0,
         //Структура построена верно?
-        isValid: false
+        isValid: false,
+        list: {},
+        smelt: false
     },
     casings: [],
 
@@ -116,28 +118,45 @@ TileEntity.registerPrototype(BlockID.quarry, {
         return item;
     },
 
-    /**
-     * Применение модификаторов апгрейдов и линз
-     */
-    applyUpgrades: function () {
+    onUpgradeChanged: function () {
         let territoryModifier = 1;
-        let smelt = false;
 
         for (let i = 0; i < 2; i++) {
             let slotUpgrade = this.container.getSlot("slotUpgrade" + i);
-            let slotLens = this.container.getSlot("slotLens" + i);
 
             if (slotUpgrade.id === ItemID.quarryUpgradeTerritory) {
                 territoryModifier *= 2;
             }
+        }
+
+        this.data.territoryModifier = territoryModifier;
+    },
+
+    onLensChanged: function () {
+        let smelt = false;
+
+        for (let i = 0; i < 2; i++) {
+            let slotLens = this.container.getSlot("slotLens" + i);
 
             if (slotLens.id === ItemID.quarryLensSmelt) {
                 smelt = true;
             }
         }
 
-        this.data.territoryModifier = territoryModifier;
-        this.smelt = smelt;
+        this.data.smelt = smelt;
+    },
+
+    onListChanged: function (slotId, id, data) {
+        let slot = this.container.getSlot("slotList" + slotId);
+        if (slot.id === id && slot.data === data) return;
+
+        if (id > 0) {
+            delete this.data.list[id + ":" + data];
+        }
+
+        if (slot.id > 0) {
+            this.data.list[slot.id + ":" + slot.data] = true;
+        }
     },
 
     /**
@@ -197,19 +216,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
         this.casings.splice(this.casings.indexOf(casing), 1);
     },
 
-    /**
-     * Обновление списка блоков в Белом/Черном списке
-     */
-    refreshList: function () {
-        this.data.list = {};
-        for (let i = 0; i < 6; i++) {
-            let slot = this.container.getSlot("slotList" + i);
-
-            if (slot.id)
-                this.data.list[slot.id + ":" + slot.data] = true;
-        }
-    },
-
     isOnTheList: function (block) {
         if (this.data.whitelist) {
             return this.data.list[block.id + ":" + block.data];
@@ -246,8 +252,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
 
         if (World.getThreadTime() % 60 === 0) {
             this.checkStructure();
-            this.refreshList(); //TODO: refactor
-            this.applyUpgrades();
         }
 
         if (this.data.enabled) {
@@ -283,7 +287,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
                         }, coords);
                         let entities = Entity.getAllInRange(coords, 2, 69);
 
-                        if (this.smelt) {
+                        if (this.data.smelt) {
                             if (dropped && dropped.length > 0) {
                                 for (let i in dropped) {
                                     const item = dropped[i];

@@ -59,9 +59,13 @@ const gui = new UI.StandartWindow({
             scale: 3.2,
             clicker: {
                 onClick: function (container, tileEntity) {
-                    soundClick.play();
-                    Player.addExperience(tileEntity.data.exp);
-                    tileEntity.data.exp = 0;
+                    if (tileEntity.data.exp > 0) {
+                        Player.addExperience(tileEntity.data.exp);
+                        tileEntity.data.exp = 0;
+                        levelUpSound.play();
+                    } else {
+                        soundClick.play();
+                    }
                 }
             }
         },

@@ -76,7 +76,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
         this.sound = new Sound("work.ogg");
         this.sound.setLooping(true);
         this.sound.setInBlock(this.x, this.y, this.z, 15);
-        //this.sound.setVolume(20);
     },
 
     created: function () {

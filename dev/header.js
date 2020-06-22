@@ -32,3 +32,5 @@ const ENERGY_PER_DESTROY = __config__.get("energyPerDestroy");
 
 const soundClick = new Sound("click.ogg");
 soundClick.setInPlayer();
+const levelUpSound = new Sound("levelUp.ogg");
+levelUpSound.setInPlayer()

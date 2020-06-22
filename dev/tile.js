@@ -73,6 +73,10 @@ TileEntity.registerPrototype(BlockID.quarry, {
 
     init: function () {
         this.casings = [];
+        this.sound = new Sound("work.ogg");
+        this.sound.setLooping(true);
+        this.sound.setInBlock(this.x, this.y, this.z, 15);
+        //this.sound.setVolume(20);
     },
 
     created: function () {
@@ -267,86 +271,97 @@ TileEntity.registerPrototype(BlockID.quarry, {
                 }
 
                 drop = this.data.drop = items;
-            } else if (World.getThreadTime() % 20 === 0
-                && this.data.isValid
-                && !this.data.complete
-                && (slotTool.id === 0 ? this.data.energy > ENERGY_PER_DESTROY : correctTool)) {
-
-                if (this.data.progress) {
-                    if (++this.data.progress > this.data.progressMax) {
-                        this.data.progress = 0;
-                        let coords = {
-                            x: this.data.digX,
-                            y: this.data.digY,
-                            z: this.data.digZ
-                        };
-                        let block = World.getBlock(this.data.digX, this.data.digY, this.data.digZ);
-                        let dropped = Block.getBlockDropViaItem(block, correctTool ? slotTool : {
-                            id: 278,
-                            data: 0
-                        }, coords);
-                        let entities = Entity.getAllInRange(coords, 2, 69);
-
-                        if (this.data.smelt) {
-                            if (dropped && dropped.length > 0) {
-                                for (let i in dropped) {
-                                    const item = dropped[i];
-                                    const smelted = Recipes.getFurnaceRecipeResult(item[0], item[2]);
-
-                                    if (smelted)
-                                        dropped[i] = [smelted.id, item[1], smelted.data];
-                                }
-                            }
-                        }
-                        this.data.drop = dropped;
-
-                        if (correctTool)
-                            this.damageTool(slotTool);
-                        else this.data.energy -= ENERGY_PER_DESTROY;
-
-                        for (let index in entities) {
-                            if (this.data.exp >= 1000)
-                                break;
-
-                            this.data.exp = Math.min(1000, this.data.exp + 2);
-                            Entity.remove(entities[index]);
-                        }
-
-                        World.setBlock(this.data.digX, this.data.digY, this.data.digZ, 3);
-                    }
-                } else if (this.data.energy >= ENERGY_PER_SCAN) {
-                    let range = 16 * this.data.territoryModifier;
-
-                    //Increase dig position
-                    if (++this.data.digX > this.x + range) {
-                        this.data.digX = this.x - range;
-                        if (++this.data.digZ > this.z + range) {
-                            this.data.digZ = this.z - range;
-                            if (--this.data.digY < 1) {
-                                this.data.complete = true;
-                            }
-                        }
-                    }
-                    //Consume energy
-                    this.data.energy -= ENERGY_PER_SCAN;
-
-                    let block = World.getBlock(this.data.digX, this.data.digY, this.data.digZ);
-                    if (block.id > 0) {
-                        let material = ToolAPI.getBlockMaterial(block.id);
-                        if (material && material.name === "stone" && this.isOnTheList(block) && !TileEntity.getPrototype(block.id)) {
-                            const coords = {
+            } else if (World.getThreadTime() % 20 === 0) {
+                if (this.data.isValid
+                    && !this.data.complete
+                    && (slotTool.id === 0 ? this.data.energy > ENERGY_PER_DESTROY : correctTool)) {
+                    if (this.data.progress) {
+                        if (++this.data.progress > this.data.progressMax) {
+                            this.data.progress = 0;
+                            let coords = {
                                 x: this.data.digX,
                                 y: this.data.digY,
                                 z: this.data.digZ
                             };
-                            this.data.progress = 1;
-                            this.data.progressMax = Math.round(ToolAPI.getDestroyTimeViaTool(block, slotTool || {
+                            let block = World.getBlock(this.data.digX, this.data.digY, this.data.digZ);
+                            let dropped = Block.getBlockDropViaItem(block, correctTool ? slotTool : {
                                 id: 278,
                                 data: 0
-                            }, coords, false) * 3);
+                            }, coords);
+                            let entities = Entity.getAllInRange(coords, 2, 69);
+
+                            if (this.data.smelt) {
+                                if (dropped && dropped.length > 0) {
+                                    for (let i in dropped) {
+                                        const item = dropped[i];
+                                        const smelted = Recipes.getFurnaceRecipeResult(item[0], item[2]);
+
+                                        if (smelted)
+                                            dropped[i] = [smelted.id, item[1], smelted.data];
+                                    }
+                                }
+                            }
+                            this.data.drop = dropped;
+
+                            if (correctTool)
+                                this.damageTool(slotTool);
+                            else this.data.energy -= ENERGY_PER_DESTROY;
+
+                            for (let index in entities) {
+                                if (this.data.exp >= 1000)
+                                    break;
+
+                                this.data.exp = Math.min(1000, this.data.exp + 2);
+                                Entity.remove(entities[index]);
+                            }
+
+                            World.setBlock(this.data.digX, this.data.digY, this.data.digZ, 3);
+                        }
+                    } else if (this.data.energy >= ENERGY_PER_SCAN) {
+                        let range = 16 * this.data.territoryModifier;
+
+                        //Increase dig position
+                        if (++this.data.digX > this.x + range) {
+                            this.data.digX = this.x - range;
+                            if (++this.data.digZ > this.z + range) {
+                                this.data.digZ = this.z - range;
+                                if (--this.data.digY < 1) {
+                                    this.data.complete = true;
+                                }
+                            }
+                        }
+                        //Consume energy
+                        this.data.energy -= ENERGY_PER_SCAN;
+
+                        let block = World.getBlock(this.data.digX, this.data.digY, this.data.digZ);
+                        if (block.id > 0) {
+                            let material = ToolAPI.getBlockMaterial(block.id);
+                            if (material && material.name === "stone" && this.isOnTheList(block) && !TileEntity.getPrototype(block.id)) {
+                                const coords = {
+                                    x: this.data.digX,
+                                    y: this.data.digY,
+                                    z: this.data.digZ
+                                };
+                                this.data.progress = 1;
+                                this.data.progressMax = Math.round(ToolAPI.getDestroyTimeViaTool(block, slotTool || {
+                                    id: 278,
+                                    data: 0
+                                }, coords, false) * 3);
+                            }
                         }
                     }
+                    if (!this.sound.isPlaying()) {
+                        this.sound.play();
+                    }
+                } else {
+                    if (this.sound.isPlaying()) {
+                        this.sound.stop();
+                    }
                 }
+            }
+        } else {
+            if (this.sound.isPlaying()) {
+                this.sound.stop();
             }
         }
 
@@ -388,6 +403,8 @@ TileEntity.registerPrototype(BlockID.quarry, {
             let casing = this.casings[i];
             casing.tile = null;
         }
+
+        this.sound.destroy();
     }
 });
 

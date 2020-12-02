@@ -17,6 +17,7 @@ const gui = new UI.StandartWindow({
             standart: true
         }
     },
+
     drawing: [
         {type: "bitmap", x: 400, y: 120, bitmap: "energy_small_background", scale: 3.2},
         {type: "bitmap", x: 595, y: 280, bitmap: "exp_bar", scale: 3.2},
@@ -116,7 +117,7 @@ const gui = new UI.StandartWindow({
 });
 
 {
-    const content = gui.getWindow("main").getContentProvider().content.elements;
+    const content = gui.getWindow("main").getContent().elements;
 
     for (let i = 0; i < 3; i++) {
         for (let k = 0; k < 5; k++) {
@@ -140,7 +141,7 @@ const gui = new UI.StandartWindow({
 
 Callback.addCallback("LevelLoaded", function () {
     let header = gui.getWindow("header");
-    let drawing = header.contentProvider.drawing[2];
+    let drawing = header.getContent().drawing[2] as UI.TextDrawing;
     if (drawing) {
         drawing.text = Translation.translate("Quarry");
     }

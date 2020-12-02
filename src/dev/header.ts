@@ -27,10 +27,10 @@ const directions = [
     [0, 0, 1],
 ];
 
-const ENERGY_PER_SCAN = __config__.get("energyPerScan");
-const ENERGY_PER_DESTROY = __config__.get("energyPerDestroy");
+const ENERGY_PER_SCAN = __config__.get("energyPerScan") as number;
+const ENERGY_PER_DESTROY = __config__.get("energyPerDestroy") as number;
 
 const soundClick = new Sound("click.ogg");
 soundClick.setInPlayer();
 const levelUpSound = new Sound("levelUp.ogg");
-levelUpSound.setInPlayer()
+levelUpSound.setInPlayer();

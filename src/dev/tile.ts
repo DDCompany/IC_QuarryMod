@@ -8,8 +8,9 @@ function findNearest(x, y, z, id, func) {
             }
 
             if (tile) {
-                if (func(tile))
+                if (func(tile)) {
                     return;
+                }
             }
         }
     }
@@ -17,8 +18,9 @@ function findNearest(x, y, z, id, func) {
 
 TileEntity.registerPrototype(BlockID.quarryCasing, {
     energyReceive: function (type, amount) {
-        if (!this.tile)
+        if (!this.tile) {
             return 0;
+        }
 
         amount = amount / EnergyTypeRegistry.getValueRatio(type, "Eu");
         const add = Math.min(amount, this.tile.getEnergyStorage() - this.tile.data.energy);
@@ -36,9 +38,10 @@ TileEntity.registerPrototype(BlockID.quarryCasing, {
     },
 
     destroy: function () {
-        if (this.tile)
+        if (this.tile) {
             this.tile.removeCasing(this);
-    }
+        }
+    },
 });
 
 TileEntity.registerPrototype(BlockID.quarry, {
@@ -67,7 +70,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
         //Структура построена верно?
         isValid: false,
         list: {},
-        smelt: false
+        smelt: false,
     },
     casings: [],
 
@@ -114,7 +117,9 @@ TileEntity.registerPrototype(BlockID.quarry, {
 
                 if (count < item[1]) {
                     return [item[0], item[1] - count, item[2]];
-                } else return null;
+                } else {
+                    return null;
+                }
             }
         }
 
@@ -151,7 +156,9 @@ TileEntity.registerPrototype(BlockID.quarry, {
 
     onListChanged: function (slotId, id, data) {
         let slot = this.container.getSlot("slotList" + slotId);
-        if (slot.id === id && slot.data === data) return;
+        if (slot.id === id && slot.data === data) {
+            return;
+        }
 
         if (id > 0) {
             delete this.data.list[id + ":" + data];
@@ -167,8 +174,9 @@ TileEntity.registerPrototype(BlockID.quarry, {
      * @returns boolean Истина если предметом slotTool можно добывать блоки с материалом stone
      */
     isCorrectTool: function (slotTool) {
-        if (!slotTool.id)
+        if (!slotTool.id) {
             return false;
+        }
 
         const toolData = ToolAPI.getToolData(slotTool.id);
         const chargeData = ChargeItemRegistry.getItemData(slotTool.id);
@@ -176,7 +184,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
             const energyPerUse = toolData.toolMaterial.energyPerUse;
             return chargeData.energy === "Eu" || chargeData.energy === "RF"
                 && energyPerUse
-                && ChargeItemRegistry.getEnergyStored(slotTool, chargeData.energy) >= energyPerUse
+                && ChargeItemRegistry.getEnergyStored(slotTool, chargeData.energy) >= energyPerUse;
         }
 
         return toolData && toolData.blockMaterials && toolData.blockMaterials["stone"];
@@ -197,8 +205,9 @@ TileEntity.registerPrototype(BlockID.quarry, {
                 this.data.energy -= energy;
             }
 
-            if (consume > 0)
+            if (consume > 0) {
                 ChargeItemRegistry.setEnergyStored(slotTool, ChargeItemRegistry.getEnergyStored(slotTool) - consume);
+            }
         } else {
             slotTool.data++;
             if (slotTool.data >= Item.getMaxDamage(slotTool.id)) {
@@ -222,7 +231,9 @@ TileEntity.registerPrototype(BlockID.quarry, {
     isOnTheList: function (block) {
         if (this.data.whitelist) {
             return this.data.list[block.id + ":" + block.data];
-        } else return !this.data.list[block.id + ":" + block.data];
+        } else {
+            return !this.data.list[block.id + ":" + block.data];
+        }
     },
 
     checkStructure: function () {
@@ -280,13 +291,13 @@ TileEntity.registerPrototype(BlockID.quarry, {
                             let coords = {
                                 x: this.data.digX,
                                 y: this.data.digY,
-                                z: this.data.digZ
+                                z: this.data.digZ,
                             };
                             let block = World.getBlock(this.data.digX, this.data.digY, this.data.digZ);
                             let dropped = Block.getBlockDropViaItem(block, correctTool ? slotTool : {
                                 id: 278,
-                                data: 0
-                            }, coords);
+                                data: 0,
+                            }, coords, this.blockSource);
                             let entities = Entity.getAllInRange(coords, 2, 69);
 
                             if (this.data.smelt) {
@@ -295,26 +306,30 @@ TileEntity.registerPrototype(BlockID.quarry, {
                                         const item = dropped[i];
                                         const smelted = Recipes.getFurnaceRecipeResult(item[0], item[2]);
 
-                                        if (smelted)
+                                        if (smelted) {
                                             dropped[i] = [smelted.id, item[1], smelted.data];
+                                        }
                                     }
                                 }
                             }
                             this.data.drop = dropped;
 
-                            if (correctTool)
+                            if (correctTool) {
                                 this.damageTool(slotTool);
-                            else this.data.energy -= ENERGY_PER_DESTROY;
+                            } else {
+                                this.data.energy -= ENERGY_PER_DESTROY;
+                            }
 
                             for (let index in entities) {
-                                if (this.data.exp >= 1000)
+                                if (this.data.exp >= 1000) {
                                     break;
+                                }
 
                                 this.data.exp = Math.min(1000, this.data.exp + 2);
                                 Entity.remove(entities[index]);
                             }
 
-                            World.setBlock(this.data.digX, this.data.digY, this.data.digZ, 3);
+                            this.blockSource.setBlock(this.data.digX, this.data.digY, this.data.digZ, 3);
                         }
                     } else if (this.data.energy >= ENERGY_PER_SCAN) {
                         let range = 16 * this.data.territoryModifier;
@@ -335,17 +350,18 @@ TileEntity.registerPrototype(BlockID.quarry, {
                         let block = World.getBlock(this.data.digX, this.data.digY, this.data.digZ);
                         if (block.id > 0) {
                             let material = ToolAPI.getBlockMaterial(block.id);
-                            if (material && material.name === "stone" && this.isOnTheList(block) && !TileEntity.getPrototype(block.id)) {
+                            if (material && material.name === "stone" && this.isOnTheList(block) &&
+                                !TileEntity.getPrototype(block.id)) {
                                 const coords = {
                                     x: this.data.digX,
                                     y: this.data.digY,
-                                    z: this.data.digZ
+                                    z: this.data.digZ,
                                 };
                                 this.data.progress = 1;
                                 this.data.progressMax = Math.round(ToolAPI.getDestroyTimeViaTool(block, slotTool || {
                                     id: 278,
-                                    data: 0
-                                }, coords, false) * 3);
+                                    data: 0,
+                                }, coords as Callback.ItemUseCoordinates, false) * 3);
                             }
                         }
                     }
@@ -367,16 +383,16 @@ TileEntity.registerPrototype(BlockID.quarry, {
         if (content) {
             if (this.data.updateFlag) {
                 this.container.setBinding("switch", "state", this.data.whitelist);
-                content.elements["buttonToggle"].bitmap = this.data.enabled ? "btn_redstone_on" : "btn_redstone_off"
+                content.elements["buttonToggle"].bitmap = this.data.enabled ? "btn_redstone_on" : "btn_redstone_off";
                 this.data.updateFlag = false;
             }
 
             let elementText = content.elements["text"];
 
             if (!this.data.enabled) {
-                elementText.text = Translation.translate("Turned off")
+                elementText.text = Translation.translate("Turned off");
             } else if (slotTool.id !== 0 && !correctTool) {
-                elementText.text = Translation.translate("Incorrect tool")
+                elementText.text = Translation.translate("Incorrect tool");
             } else if (drop && drop.length > 0) {
                 elementText.text = Translation.translate("Not enough space");
             } else if (this.data.isValid) {

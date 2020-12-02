@@ -1,8 +1,8 @@
-header.js
-blocks.js
-items.js
-gui.js
-tile.js
-recipes.js
-translation.js
+header.ts
+blocks.ts
+items.ts
+gui.ts
+tile.ts
+recipes.ts
+translation.ts
 tiletest.ts

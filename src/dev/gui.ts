@@ -63,9 +63,9 @@ const gui = new UI.StandartWindow({
                     if (tileEntity.data.exp > 0) {
                         Player.addExperience(tileEntity.data.exp);
                         tileEntity.data.exp = 0;
-                        levelUpSound.play();
+                        // levelUpSound.play(); //TODO
                     } else {
-                        soundClick.play();
+                        // soundClick.play();
                     }
                 }
             }
@@ -79,7 +79,7 @@ const gui = new UI.StandartWindow({
             scale: 3.2,
             clicker: {
                 onClick: function (container, tileEntity) {
-                    soundClick.play();
+                    // soundClick.play(); //TODO
                     tileEntity.toggleEnable()
                 }
             }
@@ -105,7 +105,7 @@ const gui = new UI.StandartWindow({
             bitmapOnHover: "toggle_on_hover",
             clicker: {
                 onClick: function () {
-                    soundClick.play();
+                    // soundClick.play(); //TODO
                 }
             },
             onNewState: function (state, container) {

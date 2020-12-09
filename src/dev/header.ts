@@ -10,11 +10,11 @@
 
 IMPORT("EnergyNet");
 IMPORT("ChargeItem");
-IMPORT("SoundAPI");
+// IMPORT("SoundAPI");
 
 const energyTypes = [
-    EnergyTypeRegistry.assureEnergyType("Eu", 1),
-    EnergyTypeRegistry.assureEnergyType("RF", 1 / 4)
+    EnergyTypeRegistry.assureEnergyType("Eu", 1, {}),
+    EnergyTypeRegistry.assureEnergyType("RF", 1 / 4, {}),
 ];
 
 
@@ -30,7 +30,9 @@ const directions = [
 const ENERGY_PER_SCAN = __config__.get("energyPerScan") as number;
 const ENERGY_PER_DESTROY = __config__.get("energyPerDestroy") as number;
 
-const soundClick = new Sound("click.ogg");
-soundClick.setInPlayer();
-const levelUpSound = new Sound("levelUp.ogg");
-levelUpSound.setInPlayer();
+//TODO: update sounds
+
+// const soundClick = new Sound("click.ogg");
+// soundClick.setInPlayer();
+// const levelUpSound = new Sound("levelUp.ogg");
+// levelUpSound.setInPlayer();

@@ -1,6 +1,6 @@
 const FONT = {
     color: android.graphics.Color.rgb(77, 77, 77),
-    shadow: 0
+    shadow: 0,
 };
 
 const gui = new UI.StandartWindow({
@@ -8,14 +8,14 @@ const gui = new UI.StandartWindow({
         header: {
             text: {
                 text: "",
-            }
+            },
         },
         inventory: {
-            standart: true
+            standart: true,
         },
         background: {
-            standart: true
-        }
+            standart: true,
+        },
     },
 
     drawing: [
@@ -29,28 +29,6 @@ const gui = new UI.StandartWindow({
         "expScale": {type: "scale", x: 595, y: 280, bitmap: "exp_bar_full", scale: 3.2},
         "slotTool": {type: "slot", x: 390, y: 40},
 
-        "slotUpgrade0": {
-            type: "slot", x: 390, y: 180, bitmap: "slot_upgrade", onItemChanged: function () {
-                gui.getContainer().getParent().onUpgradeChanged()
-            }
-        },
-        "slotUpgrade1": {
-            type: "slot", x: 390, y: 240, bitmap: "slot_upgrade", onItemChanged: function () {
-                gui.getContainer().getParent().onUpgradeChanged()
-            }
-        },
-
-        "slotLens0": {
-            type: "slot", x: 470, y: 240, bitmap: "slot_lens", onItemChanged: function () {
-                gui.getContainer().getParent().onLensChanged()
-            }
-        },
-        "slotLens1": {
-            type: "slot", x: 530, y: 240, bitmap: "slot_lens", onItemChanged: function () {
-                gui.getContainer().getParent().onLensChanged()
-            }
-        },
-
         "buttonGetExp": {
             type: "button",
             x: 830,
@@ -59,16 +37,12 @@ const gui = new UI.StandartWindow({
             bitmap2: "btn_exp_pressed",
             scale: 3.2,
             clicker: {
-                onClick: function (container, tileEntity) {
-                    if (tileEntity.data.exp > 0) {
-                        Player.addExperience(tileEntity.data.exp);
-                        tileEntity.data.exp = 0;
-                        // levelUpSound.play(); //TODO
-                    } else {
-                        // soundClick.play();
-                    }
-                }
-            }
+                onClick(container, parent) {
+                    parent.sendEvent("giveExp", {player: +Player.get()});
+                    // levelUpSound.play(); //TODO
+                    // soundClick.play();
+                },
+            },
         },
 
         "buttonToggle": {
@@ -78,11 +52,11 @@ const gui = new UI.StandartWindow({
             bitmap: "btn_redstone_off",
             scale: 3.2,
             clicker: {
-                onClick: function (container, tileEntity) {
+                onClick(container, parent) {
                     // soundClick.play(); //TODO
-                    tileEntity.toggleEnable()
-                }
-            }
+                    parent.sendEvent("toggleEnable", {});
+                },
+            },
         },
 
         "text": {
@@ -92,7 +66,7 @@ const gui = new UI.StandartWindow({
             text: "",
             font: FONT,
             format: true,
-            multiline: true
+            multiline: true,
         },
         "textExp": {type: "text", x: 595, y: 250, text: "", font: FONT},
 
@@ -104,42 +78,57 @@ const gui = new UI.StandartWindow({
             bitmapOffHover: "toggle_off_hover",
             bitmapOnHover: "toggle_on_hover",
             clicker: {
-                onClick: function () {
+                onClick() {
                     // soundClick.play(); //TODO
-                }
+                },
             },
-            onNewState: function (state, container) {
-                if (container)
-                    container.getParent().data.whitelist = state;
-            }
-        }
-    }
+            onNewState: (state, container) => container?.getParent().sendEvent("whitelistChanged", {state}),
+        },
+    },
 });
 
 {
-    const content = gui.getWindow("main").getContent().elements;
+    const elements = gui.getWindow("main").getContent().elements;
+
+    for (let i = 0; i < 2; i++) {
+        elements[`slotUpgrade${i}`] = {
+            type: "slot",
+            x: 390,
+            y: 180 + i * 60,
+            bitmap: "slot_upgrade",
+            isValid: id => id === ItemID.quarryUpgradeTerritory,
+            onItemChanged: container => container.getParent().sendEvent("upgradeChanged", {}),
+        };
+
+        elements[`slotLens${i}`] = {
+            type: "slot",
+            x: 470 + i * 60,
+            y: 240,
+            bitmap: "slot_lens",
+            isValid: id => id === ItemID.quarryLensSmelt,
+            onItemChanged: container => container.getParent().sendEvent("upgradeChanged", {}),
+        };
+    }
 
     for (let i = 0; i < 3; i++) {
         for (let k = 0; k < 5; k++) {
-            content["slot" + (i * 5 + k)] = {type: "slot", x: 470 + k * 60, y: 40 + i * 60};
+            elements["slot" + (i * 5 + k)] = {type: "slot", x: 470 + k * 60, y: 40 + i * 60};
         }
     }
 
     for (let i = 0; i < 3; i++) {
         for (let k = 0; k < 2; k++) {
             let slotId = i * 2 + k;
-            content["slotList" + slotId] = {
-                type: "slot", x: 790 + i * 60, y: 100 + k * 60, onItemChanged: function (container, id, count, data) {
-                    if (count > -1) {
-                        container.getParent().onListChanged(slotId, id, data);
-                    }
-                }
+            elements["slotList" + slotId] = {
+                type: "slot", x: 790 + i * 60, y: 100 + k * 60, onItemChanged(container) {
+                    container.getParent().sendEvent("listChanged", {});
+                },
             };
         }
     }
 }
 
-Callback.addCallback("LevelLoaded", function () {
+Callback.addCallback("LevelLoaded", () => {
     let header = gui.getWindow("header");
     let drawing = header.getContent().drawing[2] as UI.TextDrawing;
     if (drawing) {

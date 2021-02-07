@@ -17,412 +17,336 @@ function findNearest(x, y, z, id, func) {
 }
 
 TileEntity.registerPrototype(BlockID.quarryCasing, {
-    energyReceive: function (type, amount) {
-        if (!this.tile) {
+    useNetworkItemContainer: true,
+
+    energyReceive(type, amount) {
+        if (!this.parent) {
             return 0;
         }
 
         amount = amount / EnergyTypeRegistry.getValueRatio(type, "Eu");
-        const add = Math.min(amount, this.tile.getEnergyStorage() - this.tile.data.energy);
-        this.tile.data.energy += add;
-        return add;
+        const added = Math.min(amount, this.parent.getEnergyStorage() - this.parent.data.energy);
+        this.parent.data.energy += added;
+        return added;
     },
 
-    click: function () {
-        if (this.tile && !Entity.getSneaking(Player.get())) {
-            this.tile.container.openAs(this.tile.getGuiScreen());
+    click(id, count, data, coords, player) {
+        if (this.parent && !Entity.getSneaking(player)) {
+            const client = Network.getClientForPlayer(player);
+            if (!client) {
+                return true;
+            }
+
+            this.parent.container.openFor(client, this.parent.getScreenName(player, coords));
             return true;
         }
 
         return false;
     },
-
-    destroy: function () {
-        if (this.tile) {
-            this.tile.removeCasing(this);
-        }
-    },
 });
 
+interface UIDataPacket {
+    enabled: boolean,
+    whitelist: boolean
+}
+
 TileEntity.registerPrototype(BlockID.quarry, {
+    useNetworkItemContainer: true,
     defaultValues: {
-        // Карьер включен?
-        enabled: false,
-        // Количество энергии в TE
-        energy: 0,
-        // Количество опыта
         exp: 0,
-        // Модификатор радиуса копания
-        territoryModifier: 1,
-        //Координаты, на который копает карьер
-        digY: 0,
+        energy: 0,
+        radius: 16,
+        centerX: 0,
+        centerZ: 0,
         digX: 0,
+        digY: 0,
         digZ: 0,
-        // Карьер завершил свою работы?
-        complete: false,
-        // Включён белый список?
-        whitelist: false,
-        // Если true в tick произойдёт обновление состояния переключателя и кнопки включения
-        updateFlag: false,
         drop: [],
-        progress: 0,
-        progressMax: 0,
-        //Структура построена верно?
+        enabled: true,
         isValid: false,
-        list: {},
-        smelt: false,
+        whitelist: true,
+        completed: false,
     },
     casings: [],
+    list: [],
 
-    init: function () {
+    client: {
+        containerEvents: {
+            uiData: (container, window, content, data: UIDataPacket) => {
+                if (content) {
+                    const elements = content.elements;
+                    elements.buttonToggle.bitmap = data.enabled ? "btn_redstone_on" : "btn_redstone_off";
+                    elements.switch.state = data.whitelist;
+                }
+            },
+        },
+
+        load() {
+            this.sendPacket("onLoad", {});
+        },
+    },
+
+    events: {
+        onLoad() {
+            this.refreshList();
+        },
+    },
+
+    containerEvents: {
+        toggleEnable() {
+            this.data.enabled = !this.data.enabled;
+        },
+
+        giveExp(data) {
+            // @ts-ignore
+            const player = data.player;
+            if (Player.isPlayer(player)) {
+                const actor = new PlayerActor(player);
+                actor.addExperience(this.data.exp);
+                this.data.exp = 0;
+            }
+        },
+
+        whitelistChanged(data) {
+            // @ts-ignore
+            this.data.whitelist = data.state ?? this.data.state;
+        },
+
+        listChanged() {
+            this.refreshList();
+        },
+
+        upgradeChanged() {
+            this.onUpgradeChanged();
+        },
+    },
+
+    init() {
         this.casings = [];
-        // this.sound = new Sound("work.ogg");
-        this.sound.setLooping(true);
-        this.sound.setInBlock(this.x, this.y, this.z, 15);
+        this.list = [];
+        this.data.centerX = this.x - this.x % 16;
+        this.data.centerZ = this.z - this.z % 16;
+        this.data.digX = this.data.centerX - this.data.radius;
+        this.data.digZ = this.data.centerZ - this.data.radius;
+        this.data.digY = this.y - 2;
+
+        this.container.setGlobalAddTransferPolicy((container, name, id, amount) =>
+            name !== "slotTool" || this.isCorrectTool(id) ?
+                Math.min(amount, Item.getMaxStack(id) - container.getSlot(name).count) : 0);
     },
 
-    created: function () {
-        this.data.digY = this.y - 3;
-        this.data.digX = this.x - 8 * this.data.territoryModifier;
-        this.data.digZ = this.z - 8 * this.data.territoryModifier;
+    tick() {
+        if (World.getThreadTime() % 60 === 0) {
+            this.validateStructure();
+        }
+
+        if (this.data.enabled
+            && World.getThreadTime() % 20 === 0
+            && !this.data.completed
+            && this.data.energy > Math.max(ENERGY_PER_DESTROY, ENERGY_PER_SCAN)
+            && this.data.drop.length === 0) {
+            const block = this.blockSource.getBlock(this.data.digX, this.data.digY, this.data.digZ);
+            if (ToolAPI.getBlockMaterial(block.id)?.name === "stone"
+                && !TileEntity.getPrototype(block.id)
+                && this.isOnTheList(block)) {
+                const tool = this.container.getSlot("slotTool");
+                const coords = {
+                    x: this.data.digX,
+                    y: this.data.digY,
+                    z: this.data.digZ,
+                };
+                let drop = Block.getBlockDropViaItem(block, tool.id > 0 ? tool : DEFAULT_TOOL, coords,
+                    this.blockSource);
+                if (this.data.smelt) {
+                    drop = drop.map(item => {
+                        const result = Recipes.getFurnaceRecipeResult(item[0], item[2]);
+                        if (result) {
+                            return [result.id, result.count, result.data];
+                        }
+
+                        return item;
+                    });
+                }
+                this.data.drop = drop;
+
+                this.data.energy -= ENERGY_PER_DESTROY;
+                this.collectExp();
+                this.blockSource.setBlock(this.data.digX, this.data.digY, this.data.digZ, 0);
+            } else {
+                this.data.energy -= ENERGY_PER_SCAN;
+            }
+
+            this.nextPos();
+        }
+
+        if (this.data.drop.length) {
+            const drop = [];
+            for (const item of this.data.drop) {
+                const fallback = this.addItemToStorage(item);
+                if (fallback) {
+                    drop.push(fallback);
+                }
+            }
+            this.data.drop = drop;
+        }
+
+        let text = "";
+        if (!this.data.enabled) {
+            text = Translation.translate("Turned off");
+        } else if (this.data.drop.length) {
+            text = Translation.translate("Not enough space");
+        } else if (!this.data.isValid) {
+            text = Translation.translate("Incorrect structure");
+        } else if (this.data.completed) {
+            text = Translation.translate("Completed");
+        } else {
+            text = `X: ${this.data.digX} Y: ${this.data.digY} Z: ${this.data.digZ}`;
+        }
+        text += `\nRadius: ${this.data.radius / 16} chunks`;
+
+        this.container.sendEvent("uiData",
+            {enabled: this.data.enabled, whitelist: this.data.whitelist});
+        this.container.setScale("energyScale", this.data.energy / this.getEnergyStorage());
+        this.container.setScale("expScale", this.data.exp / 1000);
+        this.container.setText("text", text);
+        this.container.setText("textExp", Translation.translate("Exp: ") + this.data.exp);
+        this.container.sendChanges();
     },
 
-    getGuiScreen: function () {
-        this.data.updateFlag = true;
-        return gui;
+    nextPos() {
+        if (++this.data.digX > this.data.centerX + this.data.radius) {
+            if (++this.data.digZ > this.data.centerZ + this.data.radius) {
+                if (--this.data.digY === 0) {
+                    this.data.completed = true;
+                }
+                this.data.digZ = this.data.centerZ - this.data.radius;
+            }
+            this.data.digX = this.data.centerX - this.data.radius;
+        }
     },
 
-    toggleEnable: function () {
-        this.data.enabled = !this.data.enabled;
-        this.data.updateFlag = true;
+    collectExp() {
+        if (this.data.exp < 1000) {
+            const expOrbs = this.blockSource.fetchEntitiesInAABB(
+                this.data.digX - 2, this.data.digY - 2, this.data.digZ - 2,
+                this.data.digX + 2, this.data.digY + 2, this.data.digZ + 2,
+                EntityType.EXPERIENCE_ORB);
+
+            for (const orb of expOrbs) {
+                this.data.exp = Math.min(1000, this.data.exp + 2);
+                Entity.remove(orb);
+
+                if (this.data.exp === 1000) {
+                    break;
+                }
+            }
+        }
     },
 
-    /**
-     * Добавление дропа в буффер
-     * @param item
-     */
-    addItemToStorage: function (item) {
+    refreshList() {
+        const list = [];
+        for (let i = 0; i < 6; i++) {
+            const slot = this.container.getSlot(`slotList${i}`);
+            if (slot.id) {
+                list.push(slot.id + ":" + slot.data);
+            }
+        }
+        this.list = list;
+    },
+
+    addItemToStorage(item: [number, number, number]) {
         for (let i = 0; i < 15; i++) {
             let slot = this.container.getSlot("slot" + i);
 
             if (!slot.id) {
-                slot.id = item[0];
-                slot.count = item[1];
-                slot.data = item[2];
-
+                this.container.setSlot("slot" + i, item[0], item[1], item[2]);
                 return null;
             } else if (slot.id === item[0] && slot.data === item[2] && Item.getMaxStack(slot.id) !== slot.count) {
-                let count = Math.min(Item.getMaxStack(slot.id) - slot.count, item[1]);
-                slot.count += count;
+                const count = Math.min(Item.getMaxStack(slot.id) - slot.count, item[1]);
+                this.container.setSlot("slot" + i, slot.id, slot.count + count, slot.data);
 
-                if (count < item[1]) {
-                    return [item[0], item[1] - count, item[2]];
-                } else {
+                if (count === item[1]) {
                     return null;
                 }
+
+                item[1] = item[1] - count;
             }
         }
 
         return item;
     },
 
-    onUpgradeChanged: function () {
-        let territoryModifier = 1;
-
-        for (let i = 0; i < 2; i++) {
-            let slotUpgrade = this.container.getSlot("slotUpgrade" + i);
-
-            if (slotUpgrade.id === ItemID.quarryUpgradeTerritory) {
-                territoryModifier *= 2;
-            }
-        }
-
-        this.data.territoryModifier = territoryModifier;
-    },
-
-    onLensChanged: function () {
+    onUpgradeChanged() {
+        let radius = 1;
         let smelt = false;
 
         for (let i = 0; i < 2; i++) {
-            let slotLens = this.container.getSlot("slotLens" + i);
+            const upgrade = this.container.getSlot(`slotUpgrade${i}`).id;
+            if (upgrade == ItemID.quarryUpgradeTerritory) {
+                radius++;
+            }
 
-            if (slotLens.id === ItemID.quarryLensSmelt) {
+            const lens = this.container.getSlot(`slotLens${i}`).id;
+            if (lens == ItemID.quarryLensSmelt) {
                 smelt = true;
             }
         }
 
+        this.data.radius = radius * 16;
         this.data.smelt = smelt;
     },
 
-    onListChanged: function (slotId, id, data) {
-        let slot = this.container.getSlot("slotList" + slotId);
-        if (slot.id === id && slot.data === data) {
-            return;
-        }
-
-        if (id > 0) {
-            delete this.data.list[id + ":" + data];
-        }
-
-        if (slot.id > 0) {
-            this.data.list[slot.id + ":" + slot.data] = true;
-        }
+    isOnTheList(block) {
+        const exists = this.list.indexOf(block.id + ":" + block.data) !== -1;
+        return this.data.whitelist ? exists : !exists;
     },
 
-    /**
-     * @param slotTool
-     * @returns boolean Истина если предметом slotTool можно добывать блоки с материалом stone
-     */
-    isCorrectTool: function (slotTool) {
-        if (!slotTool.id) {
-            return false;
-        }
-
-        const toolData = ToolAPI.getToolData(slotTool.id);
-        const chargeData = ChargeItemRegistry.getItemData(slotTool.id);
-        if (chargeData) {
-            const energyPerUse = toolData.toolMaterial.energyPerUse;
-            return chargeData.energy === "Eu" || chargeData.energy === "RF"
-                && energyPerUse
-                && ChargeItemRegistry.getEnergyStored(slotTool, chargeData.energy) >= energyPerUse;
-        }
-
+    isCorrectTool(id: number) {
+        const toolData = ToolAPI.getToolData(id);
         return toolData && toolData.blockMaterials && toolData.blockMaterials["stone"];
     },
 
-    /**
-     * Тратим прочность инструмента
-     * @param slotTool
-     */
-    damageTool: function (slotTool) {
-        const chargeData = ChargeItemRegistry.getItemData(slotTool.id);
-        if (chargeData) {
-            let consume = ToolAPI.getToolData(slotTool.id).toolMaterial.energyPerUse;
-            const energy = Math.min(this.data.energy, consume);
-
-            if (energy > 0) {
-                consume -= energy;
-                this.data.energy -= energy;
-            }
-
-            if (consume > 0) {
-                ChargeItemRegistry.setEnergyStored(slotTool, ChargeItemRegistry.getEnergyStored(slotTool) - consume);
-            }
-        } else {
-            slotTool.data++;
-            if (slotTool.data >= Item.getMaxDamage(slotTool.id)) {
-                slotTool.id = 0;
-                slotTool.data = 0;
-                slotTool.count = 0;
-                slotTool.extra = 0;
-            }
-        }
-    },
-
-    addCasing: function (casing) {
-        this.casings.push(casing);
-        casing.tile = this;
-    },
-
-    removeCasing: function (casing) {
-        this.casings.splice(this.casings.indexOf(casing), 1);
-    },
-
-    isOnTheList: function (block) {
-        if (this.data.whitelist) {
-            return this.data.list[block.id + ":" + block.data];
-        } else {
-            return !this.data.list[block.id + ":" + block.data];
-        }
-    },
-
-    checkStructure: function () {
+    validateStructure() {
         for (let i = this.casings.length - 1; i >= 0; i--) {
-            let casing = this.casings[i];
+            const casing = this.casings[i];
             if (casing.remove) {
-                this.removeCasing(casing);
+                this.casings.splice(this.casings.indexOf(casing), 1);
             }
         }
 
         if (this.casings.length < 6) {
-            let self = this;
-            findNearest(this.x, this.y, this.z, BlockID.quarryCasing, function (tile) {
-                if (!tile.tile) {
-                    self.addCasing(tile);
+            findNearest(this.x, this.y, this.z, BlockID.quarryCasing, (tile) => {
+                if (!tile.parent) {
+                    this.casings.push(tile);
+                    tile.parent = this;
                 }
 
-                return self.casings.length >= 6;
+                return this.casings.length >= 6;
             });
         }
 
         this.data.isValid = this.casings.length === 6;
     },
 
-    tick: function () {
-        const content = this.container.getGuiContent();
-        let slotTool = this.container.getSlot("slotTool");
-        let correctTool = false;
-        let drop = this.data.drop;
-
-        if (World.getThreadTime() % 60 === 0) {
-            this.checkStructure();
-        }
-
-        if (this.data.enabled) {
-            correctTool = this.isCorrectTool(slotTool);
-            if (drop && drop.length > 0) {
-                const items = [];
-                for (let i in drop) {
-                    let item = drop[i];
-                    item = this.addItemToStorage(item);
-                    if (item) {
-                        items.push(item);
-                    }
-                }
-
-                drop = this.data.drop = items;
-            } else if (World.getThreadTime() % 20 === 0) {
-                if (this.data.isValid
-                    && !this.data.complete
-                    && (slotTool.id === 0 ? this.data.energy > ENERGY_PER_DESTROY : correctTool)) {
-                    if (this.data.progress) {
-                        if (++this.data.progress > this.data.progressMax) {
-                            this.data.progress = 0;
-                            let coords = {
-                                x: this.data.digX,
-                                y: this.data.digY,
-                                z: this.data.digZ,
-                            };
-                            let block = World.getBlock(this.data.digX, this.data.digY, this.data.digZ);
-                            let dropped = Block.getBlockDropViaItem(block, correctTool ? slotTool : {
-                                id: 278,
-                                data: 0,
-                            }, coords, this.blockSource);
-                            let entities = Entity.getAllInRange(coords, 2, 69);
-
-                            if (this.data.smelt) {
-                                if (dropped && dropped.length > 0) {
-                                    for (let i in dropped) {
-                                        const item = dropped[i];
-                                        const smelted = Recipes.getFurnaceRecipeResult(item[0], item[2]);
-
-                                        if (smelted) {
-                                            dropped[i] = [smelted.id, item[1], smelted.data];
-                                        }
-                                    }
-                                }
-                            }
-                            this.data.drop = dropped;
-
-                            if (correctTool) {
-                                this.damageTool(slotTool);
-                            } else {
-                                this.data.energy -= ENERGY_PER_DESTROY;
-                            }
-
-                            for (let index in entities) {
-                                if (this.data.exp >= 1000) {
-                                    break;
-                                }
-
-                                this.data.exp = Math.min(1000, this.data.exp + 2);
-                                Entity.remove(entities[index]);
-                            }
-
-                            this.blockSource.setBlock(this.data.digX, this.data.digY, this.data.digZ, 3);
-                        }
-                    } else if (this.data.energy >= ENERGY_PER_SCAN) {
-                        let range = 16 * this.data.territoryModifier;
-
-                        //Increase dig position
-                        if (++this.data.digX > this.x + range) {
-                            this.data.digX = this.x - range;
-                            if (++this.data.digZ > this.z + range) {
-                                this.data.digZ = this.z - range;
-                                if (--this.data.digY < 1) {
-                                    this.data.complete = true;
-                                }
-                            }
-                        }
-                        //Consume energy
-                        this.data.energy -= ENERGY_PER_SCAN;
-
-                        let block = World.getBlock(this.data.digX, this.data.digY, this.data.digZ);
-                        if (block.id > 0) {
-                            let material = ToolAPI.getBlockMaterial(block.id);
-                            if (material && material.name === "stone" && this.isOnTheList(block) &&
-                                !TileEntity.getPrototype(block.id)) {
-                                const coords = {
-                                    x: this.data.digX,
-                                    y: this.data.digY,
-                                    z: this.data.digZ,
-                                };
-                                this.data.progress = 1;
-                                this.data.progressMax = Math.round(ToolAPI.getDestroyTimeViaTool(block, slotTool || {
-                                    id: 278,
-                                    data: 0,
-                                }, coords as Callback.ItemUseCoordinates, false) * 3);
-                            }
-                        }
-                    }
-                    if (!this.sound.isPlaying()) {
-                        this.sound.play();
-                    }
-                } else {
-                    if (this.sound.isPlaying()) {
-                        this.sound.stop();
-                    }
-                }
-            }
-        } else {
-            if (this.sound.isPlaying()) {
-                this.sound.stop();
-            }
-        }
-
-        if (content) {
-            if (this.data.updateFlag) {
-                this.container.setBinding("switch", "state", this.data.whitelist);
-                content.elements["buttonToggle"].bitmap = this.data.enabled ? "btn_redstone_on" : "btn_redstone_off";
-                this.data.updateFlag = false;
-            }
-
-            let elementText = content.elements["text"];
-
-            if (!this.data.enabled) {
-                elementText.text = Translation.translate("Turned off");
-            } else if (slotTool.id !== 0 && !correctTool) {
-                elementText.text = Translation.translate("Incorrect tool");
-            } else if (drop && drop.length > 0) {
-                elementText.text = Translation.translate("Not enough space");
-            } else if (this.data.isValid) {
-                elementText.text = "X:" + this.data.digX + " Y:" + this.data.digY + " Z:" + this.data.digZ;
-            } else {
-                elementText.text = Translation.translate("Incorrect structure");
-            }
-
-            content.elements["textExp"].text = Translation.translate("Exp: ") + this.data.exp;
-            elementText.text += "\n\n" + Translation.translate("Range: ") + 16 * this.data.territoryModifier;
-
-            this.container.setScale("energyScale", this.data.energy / this.getEnergyStorage());
-            this.container.setScale("expScale", this.data.exp / 1000);
-        }
-    },
-
-    getEnergyStorage: function () {
+    getEnergyStorage() {
         return 50000;
     },
 
-    destroy: function () {
-        for (let i in this.casings) {
-            let casing = this.casings[i];
+    getScreenName() {
+        return "main";
+    },
+
+    getScreenByName() {
+        return gui;
+    },
+
+    destroy() {
+        for (const casing of this.casings) {
             casing.tile = null;
         }
-
-        this.sound.destroy();
-    }
+    },
 });
 
-for (let i in energyTypes) {
+for (const i in energyTypes) {
     EnergyTileRegistry.addEnergyTypeForId(BlockID.quarryCasing, energyTypes[i]);
 }

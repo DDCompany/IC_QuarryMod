@@ -12,11 +12,11 @@ IMPORT("EnergyNet");
 IMPORT("ChargeItem");
 // IMPORT("SoundAPI");
 
+const EntityType = Native.EntityType;
 const energyTypes = [
     EnergyTypeRegistry.assureEnergyType("Eu", 1, {}),
     EnergyTypeRegistry.assureEnergyType("RF", 1 / 4, {}),
 ];
-
 
 const directions = [
     [-1, 0, 0],
@@ -27,8 +27,12 @@ const directions = [
     [0, 0, 1],
 ];
 
-const ENERGY_PER_SCAN = __config__.get("energyPerScan") as number;
 const ENERGY_PER_DESTROY = __config__.get("energyPerDestroy") as number;
+const ENERGY_PER_SCAN = __config__.get("energyPerScan") as number;
+const DEFAULT_TOOL = {
+    id: VanillaItemID.diamond_pickaxe,
+    data: 0,
+};
 
 //TODO: update sounds
 

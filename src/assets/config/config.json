@@ -1,4 +1,4 @@
 {
-  "energyPerScan": 200,
-  "energyPerDestroy": 80
+  "energyPerScan": 128,
+  "energyPerDestroy": 256
 }

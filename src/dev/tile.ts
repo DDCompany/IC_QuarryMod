@@ -143,7 +143,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
         if (this.data.enabled
             && World.getThreadTime() % 20 === 0
             && !this.data.completed
-            && this.data.energy > Math.max(ENERGY_PER_DESTROY, ENERGY_PER_SCAN)
+            && this.data.energy >= ENERGY_CONSUMPTION
             && this.data.drop.length === 0) {
             const block = this.blockSource.getBlock(this.data.digX, this.data.digY, this.data.digZ);
             if (ToolAPI.getBlockMaterial(block.id)?.name === "stone"
@@ -169,14 +169,12 @@ TileEntity.registerPrototype(BlockID.quarry, {
                 }
                 this.data.drop = drop;
 
-                this.data.energy -= ENERGY_PER_DESTROY;
                 this.collectExp();
                 this.blockSource.setBlock(this.data.digX, this.data.digY, this.data.digZ, 0);
-            } else {
-                this.data.energy -= ENERGY_PER_SCAN;
             }
 
             this.nextPos();
+            this.data.energy -= ENERGY_CONSUMPTION;
         }
 
         if (this.data.drop.length) {

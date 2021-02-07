@@ -27,8 +27,7 @@ const directions = [
     [0, 0, 1],
 ];
 
-const ENERGY_PER_DESTROY = __config__.get("energyPerDestroy") as number;
-const ENERGY_PER_SCAN = __config__.get("energyPerScan") as number;
+const ENERGY_CONSUMPTION = __config__.get("energyConsumption") as number;
 const DEFAULT_TOOL = {
     id: VanillaItemID.diamond_pickaxe,
     data: 0,

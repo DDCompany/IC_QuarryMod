@@ -1,8 +1,4 @@
 header.ts
-blocks.ts
-items.ts
-gui.ts
-tile.ts
-recipes.ts
+items/
+blocks/
 translation.ts
-tiletest.ts

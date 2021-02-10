@@ -1,4 +1,5 @@
 header.ts
+api/
 items/
 blocks/
 translation.ts

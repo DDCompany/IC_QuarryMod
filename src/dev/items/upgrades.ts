@@ -3,13 +3,10 @@ Item.createItem("quarryUpgradeTerritory", "Quarry Upgrade (Territory)", {name: "
 
 UpgradesManager.register(ItemID.quarryUpgradeTerritory, {
     type: UpgradeType.UPGRADE,
+    energy: 32,
 
     onInstall(params) {
         params.radius += 16;
-    },
-
-    canWork(): boolean {
-        return true;
     },
 });
 

@@ -22,8 +22,7 @@ interface IQuarryParams {
 
 interface IUpgradeDesc {
     type: UpgradeType.UPGRADE;
-
-    canWork(tile: TileEntity.TileEntityPrototype): boolean;
+    energy?: number;
 
     onInstall?(params: IQuarryParams, tile: TileEntity.TileEntityPrototype);
 

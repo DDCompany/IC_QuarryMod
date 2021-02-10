@@ -52,6 +52,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
     lenses: [],
     params: getDefaultQuarryParams(),
     toolExtra: new ItemExtraData(),
+    energyConsumption: ENERGY_CONSUMPTION,
 
     client: {
         containerEvents: {
@@ -127,9 +128,8 @@ TileEntity.registerPrototype(BlockID.quarry, {
         if (this.data.enabled
             && World.getThreadTime() % 20 === 0
             && !this.data.completed
-            && this.data.energy >= ENERGY_CONSUMPTION
-            && this.data.drop.length === 0
-            && this.upgrades.every(upgrade => upgrade.canWork(this))) {
+            && this.data.energy >= this.energyConsumption
+            && this.data.drop.length === 0) {
             const block = this.blockSource.getBlock(this.data.digX, this.data.digY, this.data.digZ);
             if (ToolAPI.getBlockMaterial(block.id)?.name === "stone"
                 && !TileEntity.getPrototype(block.id)
@@ -159,7 +159,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
             }
 
             this.nextPos();
-            this.data.energy -= ENERGY_CONSUMPTION;
+            this.data.energy -= this.energyConsumption;
         }
 
         if (this.data.drop.length) {
@@ -290,11 +290,13 @@ TileEntity.registerPrototype(BlockID.quarry, {
     reset() {
         for (let i = 0; i < 2; i++) {
             const oldUpgrade = this.upgrades[i];
-            oldUpgrade?.onTakeOut(this);
+            oldUpgrade.onTakeOut?.(this);
         }
 
         this.params = getDefaultQuarryParams();
         this.toolExtra = new ItemExtraData();
+        this.energyConsumption =
+            ENERGY_CONSUMPTION + this.upgrades.reduce((prev, upgrade) => upgrade.energy > 0 ? upgrade.energy : prev, 0);
     },
 
     isOnTheList(block) {

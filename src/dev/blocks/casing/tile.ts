@@ -7,7 +7,7 @@ TileEntity.registerPrototype(BlockID.quarryCasing, {
         }
 
         amount = amount / EnergyTypeRegistry.getValueRatio(type, "Eu");
-        const added = Math.min(amount, this.parent.getEnergyStorage() - this.parent.data.energy);
+        const added = Math.min(1024, amount, this.parent.getEnergyStorage() - this.parent.data.energy);
         this.parent.data.energy += added;
         return added;
     },

@@ -345,7 +345,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
 
     destroy() {
         for (const casing of this.casings) {
-            casing.tile = null;
+            casing.parent = null;
         }
     },
 });

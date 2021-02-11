@@ -290,7 +290,9 @@ TileEntity.registerPrototype(BlockID.quarry, {
     reset() {
         for (let i = 0; i < 2; i++) {
             const oldUpgrade = this.upgrades[i];
-            oldUpgrade.onTakeOut?.(this);
+            if (oldUpgrade) {
+                oldUpgrade.onTakeOut?.(this);
+            }
         }
 
         this.params = getDefaultQuarryParams();

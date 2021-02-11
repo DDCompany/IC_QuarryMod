@@ -6,6 +6,9 @@ Translation.addTranslation("Quarry Casing", {ru: "Корпус карьера", 
 Translation.addTranslation("Quarry Upgrade (Territory)", {ru: "Улучшение карьера (Радиус)", zh: "采石场升级(范围)"});
 Translation.addTranslation("Quarry Lens (Smelt)", {ru: "Линза (Переплавка)", zh: "采石场接口(冶炼)"});
 
+//Other items
+Translation.addTranslation("Interdimensional Core", {ru: "Межпространственное ядро"});
+
 //UI
 Translation.addTranslation("Range: ", {ru: "Радиус: ", zh: "范围: "});
 Translation.addTranslation("Exp: ", {ru: "Опыт: ", zh: "经验"});

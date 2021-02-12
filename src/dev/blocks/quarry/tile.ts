@@ -34,7 +34,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
     defaultValues: {
         exp: 0,
         energy: 0,
-        radius: 16,
         centerX: 0,
         centerZ: 0,
         digX: 0,

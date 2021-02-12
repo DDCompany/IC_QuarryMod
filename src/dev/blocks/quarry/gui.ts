@@ -19,26 +19,25 @@ const gui = new UI.StandartWindow({
     },
 
     drawing: [
-        {type: "bitmap", x: 400, y: 120, bitmap: "quarry_mod.scale.energy", scale: 3.2},
-        {type: "bitmap", x: 595, y: 280, bitmap: "quarry_mod.scale.exp", scale: 3.2},
+        {type: "bitmap", x: 398, y: 48, bitmap: "quarry_mod.scale.energy", scale: 3.2},
+        {type: "bitmap", x: 527, y: 280, bitmap: "quarry_mod.scale.exp", scale: 3.2},
         {type: "text", text: "BL", x: 815, y: 75, font: FONT},
         {type: "text", text: "WL", x: 915, y: 75, font: FONT},
     ],
     elements: {
         "energyScale": {
             type: "scale",
-            x: 400,
-            y: 120,
+            x: 398,
+            y: 48,
             direction: 1,
             bitmap: "quarry_mod.scale.energy_full",
             scale: 3.2,
         },
-        "expScale": {type: "scale", x: 595, y: 280, bitmap: "quarry_mod.scale.exp_full", scale: 3.2},
-        "slotTool": {type: "slot", x: 390, y: 40},
+        "expScale": {type: "scale", x: 527, y: 280, bitmap: "quarry_mod.scale.exp_full", scale: 3.2},
 
         "buttonGetExp": {
             type: "button",
-            x: 830,
+            x: 836,
             y: 240,
             bitmap: "quarry_mod.btn.exp",
             bitmap2: "quarry_mod.btn.exp_pressed",
@@ -54,7 +53,7 @@ const gui = new UI.StandartWindow({
 
         "buttonToggle": {
             type: "button",
-            x: 900,
+            x: 906,
             y: 240,
             bitmap: "quarry_mod.btn.redstone_off",
             scale: 3.2,
@@ -75,7 +74,7 @@ const gui = new UI.StandartWindow({
             format: true,
             multiline: true,
         },
-        "textExp": {type: "text", x: 595, y: 250, text: "", font: FONT},
+        "textExp": {type: "text", x: 527, y: 250, text: "", font: FONT},
 
         "switch": {
             type: "switch",
@@ -101,7 +100,7 @@ const gui = new UI.StandartWindow({
         elements[`slotUpgrade${i}`] = {
             type: "slot",
             x: 390,
-            y: 180 + i * 60,
+            y: 100 + i * 60,
             bitmap: "quarry_mod.slot.upgrade",
             isValid: id => id === ItemID.quarryUpgradeTerritory,
             onItemChanged: container => container.getParent().sendEvent("upgradeChanged", {}),
@@ -109,7 +108,7 @@ const gui = new UI.StandartWindow({
 
         elements[`slotLens${i}`] = {
             type: "slot",
-            x: 470 + i * 60,
+            x: 390 + i * 60,
             y: 240,
             bitmap: "quarry_mod.slot.lens",
             isValid: id => id === ItemID.quarryLensSmelt,

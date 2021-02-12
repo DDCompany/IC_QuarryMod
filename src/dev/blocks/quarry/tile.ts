@@ -115,10 +115,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
         this.data.digX = this.data.centerX - this.params.radius;
         this.data.digZ = this.data.centerZ - this.params.radius;
         this.data.digY = this.y - 2;
-
-        this.container.setGlobalAddTransferPolicy((container, name, id, amount) =>
-            name !== "slotTool" || this.isCorrectTool(id) ?
-                Math.min(amount, Item.getMaxStack(id) - container.getSlot(name).count) : 0);
     },
 
     tick() {
@@ -135,14 +131,14 @@ TileEntity.registerPrototype(BlockID.quarry, {
             if (ToolAPI.getBlockMaterial(block.id)?.name === "stone"
                 && !TileEntity.getPrototype(block.id)
                 && this.isOnTheList(block)) {
-                const tool = this.container.getSlot("slotTool");
                 const coords = {
                     x: this.data.digX,
                     y: this.data.digY,
                     z: this.data.digZ,
                 };
-                let drop = Block.getBlockDropViaItem(block, tool.id > 0 ? tool : {
+                let drop = Block.getBlockDropViaItem(block, {
                     id: VanillaItemID.diamond_pickaxe,
+                    count: 1,
                     data: 0,
                     extra: this.toolExtra,
                 }, coords, this.blockSource);

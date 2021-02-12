@@ -3,3 +3,4 @@ api/
 items/
 blocks/
 translation.ts
+shared.ts

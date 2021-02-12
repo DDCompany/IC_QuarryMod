@@ -21,6 +21,7 @@ const gui = new UI.StandartWindow({
     drawing: [
         {type: "bitmap", x: 398, y: 48, bitmap: "quarry_mod.scale.energy", scale: 3.2},
         {type: "bitmap", x: 527, y: 280, bitmap: "quarry_mod.scale.exp", scale: 3.2},
+        {type: "bitmap", x: 527, y: 248, bitmap: "quarry_mod.bitmap.exp", scale: 3},
         {type: "text", text: "BL", x: 815, y: 75, font: FONT},
         {type: "text", text: "WL", x: 915, y: 75, font: FONT},
     ],
@@ -74,7 +75,7 @@ const gui = new UI.StandartWindow({
             format: true,
             multiline: true,
         },
-        "textExp": {type: "text", x: 527, y: 250, text: "", font: FONT},
+        "textExp": {type: "text", x: 559, y: 250, font: FONT},
 
         "switch": {
             type: "switch",

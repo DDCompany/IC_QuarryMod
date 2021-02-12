@@ -188,7 +188,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
         this.container.setScale("energyScale", this.data.energy / this.getEnergyStorage());
         this.container.setScale("expScale", this.data.exp / this.params.maxExp);
         this.container.setText("text", text);
-        this.container.setText("textExp", Translation.translate("Exp: ") + this.data.exp);
+        this.container.setText("textExp", this.data.exp);
         this.container.sendChanges();
     },
 

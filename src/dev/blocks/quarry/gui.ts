@@ -102,7 +102,7 @@ const gui = new UI.StandartWindow({
             x: 390,
             y: 100 + i * 60,
             bitmap: "quarry_mod.slot.upgrade",
-            isValid: id => id === ItemID.quarryUpgradeTerritory,
+            isValid: id => UpgradesManager.isUpgrade(id),
             onItemChanged: container => container.getParent().sendEvent("upgradeChanged", {}),
         };
 
@@ -111,7 +111,7 @@ const gui = new UI.StandartWindow({
             x: 390 + i * 60,
             y: 240,
             bitmap: "quarry_mod.slot.lens",
-            isValid: id => id === ItemID.quarryLensSmelt,
+            isValid: id => UpgradesManager.isLens(id),
             onItemChanged: container => container.getParent().sendEvent("upgradeChanged", {}),
         };
     }

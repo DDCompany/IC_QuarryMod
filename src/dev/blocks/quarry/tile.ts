@@ -214,7 +214,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
                 EntityType.EXPERIENCE_ORB);
 
             for (const orb of expOrbs) {
-                this.data.exp = Math.min(maxExp, this.data.exp + 2);
+                this.data.exp = Math.min(maxExp, this.data.exp + Entity.getCompoundTag(orb).getInt("experience value"));
                 Entity.remove(orb);
 
                 if (this.data.exp === maxExp) {

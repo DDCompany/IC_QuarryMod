@@ -13,8 +13,24 @@ UpgradesManager.register(ItemID.quarryLensSmelt, {
     },
 });
 
-Recipes.addShaped({id: ItemID.quarryLensSmelt, count: 1, data: 0}, [
-    "030",
-    "414",
-    "020",
-], ['1', 20, 0, '2', 152, 0, '3', 264, 0, '4', 42, 0]);
+Callback.addCallback("PostLoaded", () => {
+    if (ModAPI.requireAPI("ICore")) {
+        Recipes.addShaped({id: ItemID.quarryLensSmelt, count: 1, data: 0}, [
+            " 1 ",
+            "101",
+            " 1 ",
+        ], [
+            '0', VanillaBlockID.glass_pane, 0,
+            '1', ItemID.dustDiamond, 0,
+        ]);
+    } else {
+        Recipes.addShaped({id: ItemID.quarryLensSmelt, count: 1, data: 0}, [
+            " 1 ",
+            "101",
+            " 1 ",
+        ], [
+            '0', VanillaBlockID.glass_pane, 0,
+            '1', VanillaItemID.diamond, 0,
+        ]);
+    }
+});

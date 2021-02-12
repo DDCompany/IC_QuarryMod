@@ -19,22 +19,29 @@ const gui = new UI.StandartWindow({
     },
 
     drawing: [
-        {type: "bitmap", x: 400, y: 120, bitmap: "energy_small_background", scale: 3.2},
-        {type: "bitmap", x: 595, y: 280, bitmap: "exp_bar", scale: 3.2},
+        {type: "bitmap", x: 400, y: 120, bitmap: "quarry_mod.scale.energy", scale: 3.2},
+        {type: "bitmap", x: 595, y: 280, bitmap: "quarry_mod.scale.exp", scale: 3.2},
         {type: "text", text: "BL", x: 815, y: 75, font: FONT},
         {type: "text", text: "WL", x: 915, y: 75, font: FONT},
     ],
     elements: {
-        "energyScale": {type: "scale", x: 400, y: 120, direction: 1, bitmap: "energy_small_scale", scale: 3.2},
-        "expScale": {type: "scale", x: 595, y: 280, bitmap: "exp_bar_full", scale: 3.2},
+        "energyScale": {
+            type: "scale",
+            x: 400,
+            y: 120,
+            direction: 1,
+            bitmap: "quarry_mod.scale.energy_full",
+            scale: 3.2,
+        },
+        "expScale": {type: "scale", x: 595, y: 280, bitmap: "quarry_mod.scale.exp_full", scale: 3.2},
         "slotTool": {type: "slot", x: 390, y: 40},
 
         "buttonGetExp": {
             type: "button",
             x: 830,
             y: 240,
-            bitmap: "btn_exp",
-            bitmap2: "btn_exp_pressed",
+            bitmap: "quarry_mod.btn.exp",
+            bitmap2: "quarry_mod.btn.exp_pressed",
             scale: 3.2,
             clicker: {
                 onClick(container, parent) {
@@ -49,7 +56,7 @@ const gui = new UI.StandartWindow({
             type: "button",
             x: 900,
             y: 240,
-            bitmap: "btn_redstone_off",
+            bitmap: "quarry_mod.btn.redstone_off",
             scale: 3.2,
             clicker: {
                 onClick(container, parent) {
@@ -75,8 +82,8 @@ const gui = new UI.StandartWindow({
             x: 850,
             y: 52,
             scale: 2,
-            bitmapOffHover: "toggle_off_hover",
-            bitmapOnHover: "toggle_on_hover",
+            bitmapOffHover: "quarry_mod.toggle.off_hover",
+            bitmapOnHover: "quarry_mod.toggle.on_hover",
             clicker: {
                 onClick() {
                     // soundClick.play(); //TODO
@@ -95,7 +102,7 @@ const gui = new UI.StandartWindow({
             type: "slot",
             x: 390,
             y: 180 + i * 60,
-            bitmap: "slot_upgrade",
+            bitmap: "quarry_mod.slot.upgrade",
             isValid: id => id === ItemID.quarryUpgradeTerritory,
             onItemChanged: container => container.getParent().sendEvent("upgradeChanged", {}),
         };
@@ -104,7 +111,7 @@ const gui = new UI.StandartWindow({
             type: "slot",
             x: 470 + i * 60,
             y: 240,
-            bitmap: "slot_lens",
+            bitmap: "quarry_mod.slot.lens",
             isValid: id => id === ItemID.quarryLensSmelt,
             onItemChanged: container => container.getParent().sendEvent("upgradeChanged", {}),
         };

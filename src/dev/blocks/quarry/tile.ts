@@ -59,7 +59,8 @@ TileEntity.registerPrototype(BlockID.quarry, {
             uiData: (container, window, content, data: UIDataPacket) => {
                 if (content) {
                     const elements = content.elements;
-                    elements.buttonToggle.bitmap = data.enabled ? "btn_redstone_on" : "btn_redstone_off";
+                    elements.buttonToggle.bitmap =
+                        data.enabled ? "quarry_mod.btn.redstone_on" : "quarry_mod.btn.redstone_off";
                     elements.switch.state = data.whitelist;
                 }
             },

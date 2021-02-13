@@ -1,17 +1,8 @@
 type T_Drop = [number, number, number, ItemExtraData?][];
 
 enum UpgradeType {
-    UPGRADE = "upgrade",
+    MODULE = "module",
     LENS = "lens"
-}
-
-interface ILensDesc {
-    type: UpgradeType.LENS;
-    singleton?: boolean
-
-    processDrop?(items: T_Drop): T_Drop;
-
-    modifyExtra?(extra: ItemExtraData);
 }
 
 interface IQuarryParams {
@@ -21,8 +12,13 @@ interface IQuarryParams {
 }
 
 interface IUpgradeDesc {
-    type: UpgradeType.UPGRADE;
+    type: UpgradeType;
+    singleton?: boolean
     energy?: number;
+
+    processDrop?(items: T_Drop): T_Drop;
+
+    modifyExtra?(extra: ItemExtraData, slot: UI.Slot);
 
     onInstall?(params: IQuarryParams, tile: TileEntity.TileEntityPrototype);
 
@@ -33,9 +29,8 @@ interface IUpgradeDesc {
 
 class UpgradesManager {
     private static readonly upgrades: Record<number, IUpgradeDesc> = {};
-    private static readonly lenses: Record<number, ILensDesc> = {};
 
-    static register(id: number, desc: IUpgradeDesc | ILensDesc) {
+    static register(id: number, desc: IUpgradeDesc) {
         if (!id || id < 0) {
             throw "Invalid item. Id must be > 0";
         }
@@ -44,40 +39,30 @@ class UpgradesManager {
             throw "Invalid upgrade description";
         }
 
-        switch (desc.type) {
-            case UpgradeType.LENS:
-                if (this.isLens(id)) {
-                    throw "Lens already registered";
-                }
-
-                this.lenses[id] = desc;
-                break;
-            case UpgradeType.UPGRADE:
-                if (this.isUpgrade(id)) {
-                    throw "Upgrade already registered";
-                }
-
-                this.upgrades[id] = desc;
-                break;
-            default:
-                throw "Invalid upgrade type";
+        if (desc.type !== UpgradeType.LENS && desc.type !== UpgradeType.MODULE) {
+            throw "Invalid upgrade type";
         }
 
+        if (this.isUpgrade(id)) {
+            throw "Lens already registered";
+        }
+
+        this.upgrades[id] = desc;
     }
 
     static getUpgrade(id: number): IUpgradeDesc {
         return this.upgrades[id];
     }
 
-    static getLens(id: number): ILensDesc {
-        return this.lenses[id];
-    }
-
     static isUpgrade(id: number): boolean {
         return !!this.upgrades[id];
     }
 
+    static isModule(id: number): boolean {
+        return this.upgrades[id]?.type === UpgradeType.MODULE;
+    }
+
     static isLens(id: number): boolean {
-        return !!this.lenses[id];
+        return this.upgrades[id]?.type === UpgradeType.MODULE;
     }
 }

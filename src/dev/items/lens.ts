@@ -13,6 +13,23 @@ UpgradesManager.register(ItemID.quarryLensSmelt, {
     },
 });
 
+IDRegistry.genItemID("quarryLensEnchanted");
+Item.createItem("quarryLensEnchanted", "Quarry Lens (Enchanted)", {name: "lens", meta: 1}, {stack: 1});
+Item.setEnchantType(ItemID.quarryLensEnchanted, Native.EnchantType.pickaxe, 10);
+
+UpgradesManager.register(ItemID.quarryLensEnchanted, {
+    type: UpgradeType.LENS,
+
+    modifyExtra(extra, slot) {
+        if (slot.extra) {
+            const enchants = slot.extra.getEnchants();
+            for (const key in enchants) {
+                extra.addEnchant(+key, enchants[key]);
+            }
+        }
+    },
+});
+
 Callback.addCallback("PostLoaded", () => {
     if (ModAPI.requireAPI("ICore")) {
         Recipes.addShaped({id: ItemID.quarryLensSmelt, count: 1, data: 0}, [
@@ -23,6 +40,16 @@ Callback.addCallback("PostLoaded", () => {
             '0', VanillaBlockID.glass_pane, 0,
             '1', ItemID.dustDiamond, 0,
         ]);
+
+        Recipes.addShaped({id: ItemID.quarryLensEnchanted, count: 1, data: 0}, [
+            " 2 ",
+            "101",
+            " 2 ",
+        ], [
+            '0', VanillaBlockID.glass_pane, 0,
+            '1', VanillaItemID.writable_book, 0,
+            '2', ItemID.dustDiamond, 0,
+        ]);
     } else {
         Recipes.addShaped({id: ItemID.quarryLensSmelt, count: 1, data: 0}, [
             " 1 ",
@@ -31,6 +58,16 @@ Callback.addCallback("PostLoaded", () => {
         ], [
             '0', VanillaBlockID.glass_pane, 0,
             '1', VanillaItemID.diamond, 0,
+        ]);
+
+        Recipes.addShaped({id: ItemID.quarryLensEnchanted, count: 1, data: 0}, [
+            " 2 ",
+            "101",
+            " 2 ",
+        ], [
+            '0', VanillaBlockID.glass_pane, 0,
+            '1', VanillaItemID.writable_book, 0,
+            '2', VanillaItemID.diamond, 0,
         ]);
     }
 });

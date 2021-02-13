@@ -1,11 +1,11 @@
-IDRegistry.genItemID("quarryUpgradeBase");
-Item.createItem("quarryUpgradeBase", "Quarry Upgrade Base", {name: "upgrade_base", meta: 0}, {});
+IDRegistry.genItemID("quarryModuleBase");
+Item.createItem("quarryModuleBase", "Quarry Module Base", {name: "module_base", meta: 0}, {});
 
-IDRegistry.genItemID("quarryUpgradeTerritory");
-Item.createItem("quarryUpgradeTerritory", "Quarry Upgrade (Territory)", {name: "upgrade", meta: 0}, {stack: 1});
+IDRegistry.genItemID("quarryModuleTerritory");
+Item.createItem("quarryModuleTerritory", "Quarry Module (Territory)", {name: "module", meta: 0}, {stack: 1});
 
-UpgradesManager.register(ItemID.quarryUpgradeTerritory, {
-    type: UpgradeType.UPGRADE,
+UpgradesManager.register(ItemID.quarryModuleTerritory, {
+    type: UpgradeType.MODULE,
     energy: 32,
 
     onInstall(params) {
@@ -14,12 +14,12 @@ UpgradesManager.register(ItemID.quarryUpgradeTerritory, {
 });
 
 
-IDRegistry.genItemID("quarryUpgradeExpStorage");
-Item.createItem("quarryUpgradeExpStorage", "Quarry Upgrade (Experience Storage)", {name: "upgrade", meta: 1},
+IDRegistry.genItemID("quarryModuleExpStorage");
+Item.createItem("quarryModuleExpStorage", "Quarry Module (Experience Storage)", {name: "module", meta: 1},
     {stack: 1});
 
-UpgradesManager.register(ItemID.quarryUpgradeExpStorage, {
-    type: UpgradeType.UPGRADE,
+UpgradesManager.register(ItemID.quarryModuleExpStorage, {
+    type: UpgradeType.MODULE,
     energy: 32,
 
     onInstall(params) {
@@ -29,7 +29,7 @@ UpgradesManager.register(ItemID.quarryUpgradeExpStorage, {
 
 Callback.addCallback("PostLoaded", () => {
     if (ModAPI.requireAPI("ICore")) {
-        Recipes.addShaped({id: ItemID.quarryUpgradeBase, count: 1, data: 0}, [
+        Recipes.addShaped({id: ItemID.quarryModuleBase, count: 1, data: 0}, [
             " 3 ",
             "202",
             " 1 ",
@@ -40,7 +40,7 @@ Callback.addCallback("PostLoaded", () => {
             '3', VanillaItemID.redstone, 0,
         ]);
     } else {
-        Recipes.addShaped({id: ItemID.quarryUpgradeBase, count: 1, data: 0}, [
+        Recipes.addShaped({id: ItemID.quarryModuleBase, count: 1, data: 0}, [
             " 2 ",
             "202",
             " 1 ",
@@ -51,22 +51,22 @@ Callback.addCallback("PostLoaded", () => {
         ]);
     }
 
-    Recipes.addShaped({id: ItemID.quarryUpgradeTerritory, count: 1, data: 0}, [
+    Recipes.addShaped({id: ItemID.quarryModuleTerritory, count: 1, data: 0}, [
         " 2 ",
         "101",
         " 2 ",
     ], [
-        '0', ItemID.quarryUpgradeBase, 0,
+        '0', ItemID.quarryModuleBase, 0,
         '1', VanillaItemID.diamond, 0,
         '2', VanillaItemID.ender_pearl, 0,
     ]);
 
-    Recipes.addShaped({id: ItemID.quarryUpgradeExpStorage, count: 1, data: 0}, [
+    Recipes.addShaped({id: ItemID.quarryModuleExpStorage, count: 1, data: 0}, [
         " 2 ",
         "101",
         " 2 ",
     ], [
-        '0', ItemID.quarryUpgradeBase, 0,
+        '0', ItemID.quarryModuleBase, 0,
         '1', VanillaItemID.gold_ingot, 0,
         '2', VanillaItemID.glass_bottle, 0,
     ]);

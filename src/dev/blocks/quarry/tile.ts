@@ -48,7 +48,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
     casings: [],
     list: [],
     upgrades: [],
-    lenses: [],
     params: getDefaultQuarryParams(),
     toolExtra: new ItemExtraData(),
     energyConsumption: ENERGY_CONSUMPTION,
@@ -141,7 +140,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
                     data: 0,
                     extra: this.toolExtra,
                 }, coords, this.blockSource);
-                this.lenses.forEach(lens => {
+                this.upgrades.forEach(lens => {
                     if (lens.processDrop) {
                         drop = lens.processDrop(drop);
                     }
@@ -267,27 +266,21 @@ TileEntity.registerPrototype(BlockID.quarry, {
 
         const container = this.container;
         const upgrades = [];
-        const lenses = [];
 
-        for (let i = 0; i < 2; i++) {
-            const upgrade = UpgradesManager.getUpgrade(container.getSlot(`slotUpgrade${i}`).id);
-            if (upgrade) {
-                upgrade.onInstall(this.params, this);
+        for (let i = 0; i < 4; i++) {
+            const slot = container.getSlot(i < 2 ? `slotModule${i}` : `slotLens${2 - i}`);
+            const upgrade = UpgradesManager.getUpgrade(slot.id);
+            if (upgrade && (!upgrade.singleton || upgrades.indexOf(upgrade) === -1)) {
+                upgrade.onInstall?.(this.params, this);
+                upgrade.modifyExtra?.(this.toolExtra, slot);
                 upgrades.push(upgrade);
-            }
-
-            const lens = UpgradesManager.getLens(container.getSlot(`slotLens${i}`).id);
-            if (lens && (!lens.singleton || lenses.indexOf(lens) === -1)) {
-                lens.modifyExtra?.(this.toolExtra);
-                lenses.push(lens);
             }
         }
 
         this.data.exp = Math.min(this.data.exp, this.params.maxExp);
+        this.data.energy = Math.min(this.data.energy, this.params.maxEnergy);
         // noinspection JSConstantReassignment
         this.upgrades = upgrades;
-        // noinspection JSConstantReassignment
-        this.lenses = lenses;
     },
 
     reset() {

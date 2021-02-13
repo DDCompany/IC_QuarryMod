@@ -107,11 +107,11 @@ const gui = new UI.StandartWindow({
     const elements = gui.getWindow("main").getContent().elements;
 
     for (let i = 0; i < 2; i++) {
-        elements[`slotUpgrade${i}`] = {
+        elements[`slotModule${i}`] = {
             type: "slot",
             x: 390,
             y: 100 + i * 60,
-            bitmap: "quarry_mod.slot.upgrade",
+            bitmap: "quarry_mod.slot.module",
             isValid: id => UpgradesManager.isUpgrade(id),
             onItemChanged: container => container.getParent().sendEvent("upgradeChanged", {}),
         };

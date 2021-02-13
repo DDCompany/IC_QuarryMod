@@ -3,10 +3,11 @@ Translation.addTranslation("Quarry", {ru: "Карьер", zh: "采石场"});
 Translation.addTranslation("Quarry Casing", {ru: "Корпус карьера", zh: "采石场框架"});
 
 //Upgrades & lenses
-Translation.addTranslation("Quarry Upgrade Base", {ru: "Основа улучшение карьера"});
-Translation.addTranslation("Quarry Upgrade (Territory)", {ru: "Улучшение карьера (Радиус)", zh: "采石场升级(范围)"});
-Translation.addTranslation("Quarry Upgrade (Experience Storage)", {ru: "Улучшение карьера (Хранилище опыта)"});
+Translation.addTranslation("Quarry Module Base", {ru: "Основа улучшение карьера"});
+Translation.addTranslation("Quarry Module (Territory)", {ru: "Улучшение карьера (Радиус)", zh: "采石场升级(范围)"});
+Translation.addTranslation("Quarry Module (Experience Storage)", {ru: "Улучшение карьера (Хранилище опыта)"});
 Translation.addTranslation("Quarry Lens (Smelt)", {ru: "Линза (Переплавка)", zh: "采石场接口(冶炼)"});
+Translation.addTranslation("Quarry Lens (Enchanted)", {ru: "Линза (Зачарование)"});
 
 //Other items
 Translation.addTranslation("Interdimensional Core", {ru: "Межпространственное ядро"});

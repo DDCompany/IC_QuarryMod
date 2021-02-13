@@ -13,6 +13,20 @@ UpgradesManager.register(ItemID.quarryUpgradeTerritory, {
     },
 });
 
+
+IDRegistry.genItemID("quarryUpgradeExpStorage");
+Item.createItem("quarryUpgradeExpStorage", "Quarry Upgrade (Experience Storage)", {name: "upgrade", meta: 1},
+    {stack: 1});
+
+UpgradesManager.register(ItemID.quarryUpgradeExpStorage, {
+    type: UpgradeType.UPGRADE,
+    energy: 32,
+
+    onInstall(params) {
+        params.maxExp *= 2;
+    },
+});
+
 Callback.addCallback("PostLoaded", () => {
     if (ModAPI.requireAPI("ICore")) {
         Recipes.addShaped({id: ItemID.quarryUpgradeBase, count: 1, data: 0}, [
@@ -45,6 +59,15 @@ Callback.addCallback("PostLoaded", () => {
         '0', ItemID.quarryUpgradeBase, 0,
         '1', VanillaItemID.diamond, 0,
         '2', VanillaItemID.ender_pearl, 0,
-        '3', VanillaItemID.glowstone_dust, 0,
+    ]);
+
+    Recipes.addShaped({id: ItemID.quarryUpgradeExpStorage, count: 1, data: 0}, [
+        " 2 ",
+        "101",
+        " 2 ",
+    ], [
+        '0', ItemID.quarryUpgradeBase, 0,
+        '1', VanillaItemID.gold_ingot, 0,
+        '2', VanillaItemID.glass_bottle, 0,
     ]);
 });

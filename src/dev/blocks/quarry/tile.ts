@@ -283,6 +283,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
             }
         }
 
+        this.data.exp = Math.min(this.data.exp, this.params.maxExp);
         // noinspection JSConstantReassignment
         this.upgrades = upgrades;
         // noinspection JSConstantReassignment

@@ -5,6 +5,7 @@ Translation.addTranslation("Quarry Casing", {ru: "Корпус карьера", 
 //Upgrades & lenses
 Translation.addTranslation("Quarry Upgrade Base", {ru: "Основа улучшение карьера"});
 Translation.addTranslation("Quarry Upgrade (Territory)", {ru: "Улучшение карьера (Радиус)", zh: "采石场升级(范围)"});
+Translation.addTranslation("Quarry Upgrade (Experience Storage)", {ru: "Улучшение карьера (Хранилище опыта)"});
 Translation.addTranslation("Quarry Lens (Smelt)", {ru: "Линза (Переплавка)", zh: "采石场接口(冶炼)"});
 
 //Other items

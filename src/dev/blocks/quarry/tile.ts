@@ -182,7 +182,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
                 this.data.progress = 0;
             }
 
-            Debug.m(this.data.progress, this.params.maxProgress, this.energyConsumption);
             this.data.energy -= this.energyConsumption;
         }
 

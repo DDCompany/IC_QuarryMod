@@ -23,26 +23,26 @@ const gui = new UI.StandartWindow({
     },
 
     drawing: [
-        {type: "bitmap", x: 398, y: 48, bitmap: "quarry_mod.scale.energy", scale: 3.2},
-        {type: "bitmap", x: 527, y: 280, bitmap: "quarry_mod.scale.exp", scale: 3.2},
-        {type: "bitmap", x: 527, y: 248, bitmap: "quarry_mod.bitmap.exp", scale: 3},
-        {type: "text", text: "BL", x: 815, y: 75, font: FONT},
-        {type: "text", text: "WL", x: 915, y: 75, font: FONT},
+        {type: "bitmap", x: 378, y: 48, bitmap: "quarry_mod.scale.energy", scale: 3.2},
+        {type: "bitmap", x: 507, y: 280, bitmap: "quarry_mod.scale.exp", scale: 3.2},
+        {type: "bitmap", x: 507, y: 246, bitmap: "quarry_mod.bitmap.exp", scale: 3},
+        {type: "text", text: "BL", x: 786, y: 75, font: FONT},
+        {type: "text", text: "WL", x: 906, y: 75, font: FONT},
     ],
     elements: {
         "energyScale": {
             type: "scale",
-            x: 398,
+            x: 378,
             y: 48,
             direction: 1,
             bitmap: "quarry_mod.scale.energy_full",
             scale: 3.2,
         },
-        "expScale": {type: "scale", x: 527, y: 280, bitmap: "quarry_mod.scale.exp_full", scale: 3.2},
+        "expScale": {type: "scale", x: 507, y: 280, bitmap: "quarry_mod.scale.exp_full", scale: 3.2},
 
         "buttonGetExp": {
             type: "button",
-            x: 836,
+            x: 816,
             y: 240,
             bitmap: "quarry_mod.btn.exp",
             bitmap2: "quarry_mod.btn.exp_pressed",
@@ -58,7 +58,7 @@ const gui = new UI.StandartWindow({
 
         "buttonToggle": {
             type: "button",
-            x: 906,
+            x: 886,
             y: 240,
             bitmap: "quarry_mod.btn.redstone_off",
             scale: 3.2,
@@ -72,23 +72,23 @@ const gui = new UI.StandartWindow({
 
         "text": {
             type: "text",
-            x: 390,
+            x: 370,
             y: 315,
             text: "",
             font: FONT,
         },
         "textError": {
             type: "text",
-            x: 390,
+            x: 370,
             y: 315,
             text: "",
             font: FONT_ERROR,
         },
-        "textExp": {type: "text", x: 559, y: 250, font: FONT},
+        "textExp": {type: "text", x: 539, y: 248, font: FONT},
 
         "switch": {
             type: "switch",
-            x: 850,
+            x: 830,
             y: 52,
             scale: 2,
             bitmapOffHover: "quarry_mod.toggle.off_hover",
@@ -103,13 +103,19 @@ const gui = new UI.StandartWindow({
     },
 });
 
+Callback.addCallback("PostLoaded", () => {
+    const font = new UI.Font(FONT);
+    alert(font.getTextWidth("BL", gui.getWindow("main").getScale()) + " " +
+        font.getTextWidth("WL", gui.getWindow("main").getScale()));
+});
+
 {
     const elements = gui.getWindow("main").getContent().elements;
 
     for (let i = 0; i < 2; i++) {
         elements[`slotModule${i}`] = {
             type: "slot",
-            x: 390,
+            x: 370,
             y: 100 + i * 60,
             bitmap: "quarry_mod.slot.module",
             isValid: id => UpgradesManager.isUpgrade(id),
@@ -118,7 +124,7 @@ const gui = new UI.StandartWindow({
 
         elements[`slotLens${i}`] = {
             type: "slot",
-            x: 390 + i * 60,
+            x: 370 + i * 60,
             y: 240,
             bitmap: "quarry_mod.slot.lens",
             isValid: id => UpgradesManager.isLens(id),
@@ -128,7 +134,7 @@ const gui = new UI.StandartWindow({
 
     for (let i = 0; i < 3; i++) {
         for (let k = 0; k < 5; k++) {
-            elements["slot" + (i * 5 + k)] = {type: "slot", x: 470 + k * 60, y: 40 + i * 60};
+            elements["slot" + (i * 5 + k)] = {type: "slot", x: 450 + k * 60, y: 40 + i * 60};
         }
     }
 
@@ -136,7 +142,7 @@ const gui = new UI.StandartWindow({
         for (let k = 0; k < 2; k++) {
             let slotId = i * 2 + k;
             elements["slotList" + slotId] = {
-                type: "slot", x: 790 + i * 60, y: 100 + k * 60, onItemChanged(container) {
+                type: "slot", x: 770 + i * 60, y: 100 + k * 60, onItemChanged(container) {
                     container.getParent().sendEvent("listChanged", {});
                 },
             };

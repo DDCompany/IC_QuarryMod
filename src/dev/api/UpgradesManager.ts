@@ -9,6 +9,7 @@ interface IQuarryParams {
     radius: number;
     maxExp: number;
     maxEnergy: number;
+    maxProgress: number;
 }
 
 interface IUpgradeDesc {
@@ -20,7 +21,7 @@ interface IUpgradeDesc {
 
     modifyExtra?(extra: ItemExtraData, slot: UI.Slot);
 
-    onInstall?(params: IQuarryParams, tile: TileEntity.TileEntityPrototype);
+    onInstall?(params: IQuarryParams, tile: TileEntity.TileEntityPrototype, slot: UI.Slot);
 
     onTakeOut?(tile: TileEntity.TileEntityPrototype);
 

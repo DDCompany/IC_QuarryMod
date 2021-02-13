@@ -6,7 +6,7 @@ Item.createItem("quarryModuleTerritory", "Quarry Module (Territory)", {name: "mo
 
 UpgradesManager.register(ItemID.quarryModuleTerritory, {
     type: UpgradeType.MODULE,
-    energy: 32,
+    energy: 16,
 
     onInstall(params) {
         params.radius += 16;
@@ -20,7 +20,7 @@ Item.createItem("quarryModuleExpStorage", "Quarry Module (Experience Storage)", 
 
 UpgradesManager.register(ItemID.quarryModuleExpStorage, {
     type: UpgradeType.MODULE,
-    energy: 32,
+    energy: 16,
 
     onInstall(params) {
         params.maxExp *= 2;

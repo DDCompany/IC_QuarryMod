@@ -27,11 +27,7 @@ const directions = [
     [0, 0, 1],
 ];
 
-const ENERGY_CONSUMPTION = __config__.get("energyConsumption") as number;
-const DEFAULT_TOOL = {
-    id: VanillaItemID.diamond_pickaxe,
-    data: 0,
-};
+const ENERGY_CONSUMPTION = +__config__.get("energyConsumption");
 
 //TODO: update sounds
 

@@ -5,7 +5,7 @@ UpgradesManager.register(ItemID.quarryLensSmelt, {
     type: UpgradeType.LENS,
     singleton: true,
 
-    processDrop(items: T_Drop): T_Drop {
+    processDrop(items): T_Drop {
         return items.map(item => {
             const result = Recipes.getFurnaceRecipeResult(item[0], item[2]);
             return result ? [result.id, result.count, result.data] : item;
@@ -19,6 +19,13 @@ Item.setEnchantType(ItemID.quarryLensEnchanted, Native.EnchantType.pickaxe, 10);
 
 UpgradesManager.register(ItemID.quarryLensEnchanted, {
     type: UpgradeType.LENS,
+
+    onInstall(params, tile, slot) {
+        if (slot.extra) {
+            const level = slot.extra.getEnchantLevel(Native.Enchantment.EFFICIENCY);
+            params.maxProgress *= 0.8 ** level;
+        }
+    },
 
     modifyExtra(extra, slot) {
         if (slot.extra) {

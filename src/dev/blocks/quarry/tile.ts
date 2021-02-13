@@ -21,11 +21,14 @@ interface UIDataPacket {
     whitelist: boolean
 }
 
+const BASE_SPEED = 80;
+
 function getDefaultQuarryParams(): IQuarryParams {
     return {
         radius: 16,
         maxEnergy: 50000,
         maxExp: 1000,
+        maxProgress: BASE_SPEED,
     };
 }
 
@@ -36,6 +39,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
         energy: 0,
         centerX: 0,
         centerZ: 0,
+        progress: 0,
         digX: 0,
         digY: 0,
         digZ: 0,
@@ -120,43 +124,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
             this.validateStructure();
         }
 
-        if (this.data.enabled
-            && World.getThreadTime() % 20 === 0
-            && !this.data.completed
-            && this.data.energy >= this.energyConsumption
-            && this.data.drop.length === 0) {
-            const block = this.blockSource.getBlock(this.data.digX, this.data.digY, this.data.digZ);
-            if (ToolAPI.getBlockMaterial(block.id)?.name === "stone"
-                && !TileEntity.getPrototype(block.id)
-                && this.isOnTheList(block)) {
-                const coords = {
-                    x: this.data.digX,
-                    y: this.data.digY,
-                    z: this.data.digZ,
-                };
-                let drop = Block.getBlockDropViaItem(block, {
-                    id: VanillaItemID.diamond_pickaxe,
-                    count: 1,
-                    data: 0,
-                    extra: this.toolExtra,
-                }, coords, this.blockSource);
-                this.upgrades.forEach(lens => {
-                    if (lens.processDrop) {
-                        drop = lens.processDrop(drop);
-                    }
-                });
-                this.data.drop = drop;
-
-                this.collectExp();
-                this.blockSource.setBlock(this.data.digX, this.data.digY, this.data.digZ, 0);
-                this.upgrades.forEach(
-                    upgrade => upgrade.onDig?.(this.data.digX, this.data.digY, this.data.digZ, block, this));
-            }
-
-            this.nextPos();
-            this.data.energy -= this.energyConsumption;
-        }
-
         if (this.data.drop.length) {
             const drop = [];
             for (const item of this.data.drop) {
@@ -179,6 +146,44 @@ TileEntity.registerPrototype(BlockID.quarry, {
             text = Translation.translate("Completed");
         } else if (this.data.energy < this.energyConsumption) {
             text = Translation.translate("Not enough energy");
+        } else {
+            if (this.data.progress < this.params.maxProgress) {
+                this.data.progress++;
+            } else {
+                const block = this.blockSource.getBlock(this.data.digX, this.data.digY, this.data.digZ);
+                if (ToolAPI.getBlockMaterial(block.id)?.name === "stone"
+                    && !TileEntity.getPrototype(block.id)
+                    && this.isOnTheList(block)) {
+                    const coords = {
+                        x: this.data.digX,
+                        y: this.data.digY,
+                        z: this.data.digZ,
+                    };
+                    let drop = Block.getBlockDropViaItem(block, {
+                        id: VanillaItemID.diamond_pickaxe,
+                        count: 1,
+                        data: 0,
+                        extra: this.toolExtra,
+                    }, coords, this.blockSource);
+                    this.upgrades.forEach(lens => {
+                        if (lens.processDrop) {
+                            drop = lens.processDrop(drop);
+                        }
+                    });
+                    this.data.drop = drop;
+
+                    this.collectExp();
+                    this.blockSource.setBlock(this.data.digX, this.data.digY, this.data.digZ, 0);
+                    this.upgrades.forEach(
+                        upgrade => upgrade.onDig?.(this.data.digX, this.data.digY, this.data.digZ, block, this));
+                }
+
+                this.nextPos();
+                this.data.progress = 0;
+            }
+
+            Debug.m(this.data.progress, this.params.maxProgress, this.energyConsumption);
+            this.data.energy -= this.energyConsumption;
         }
 
         if (text) {
@@ -271,11 +276,16 @@ TileEntity.registerPrototype(BlockID.quarry, {
             const slot = container.getSlot(i < 2 ? `slotModule${i}` : `slotLens${2 - i}`);
             const upgrade = UpgradesManager.getUpgrade(slot.id);
             if (upgrade && (!upgrade.singleton || upgrades.indexOf(upgrade) === -1)) {
-                upgrade.onInstall?.(this.params, this);
+                upgrade.onInstall?.(this.params, this, slot);
                 upgrade.modifyExtra?.(this.toolExtra, slot);
                 upgrades.push(upgrade);
             }
         }
+
+        const upgradeEnergy = this.upgrades.reduce((prev, upgrade) =>
+            upgrade.energy > 0 ? prev + upgrade.energy : prev, 0);
+        this.energyConsumption =
+            Math.floor(BASE_SPEED / this.params.maxProgress * (ENERGY_CONSUMPTION + upgradeEnergy));
 
         this.data.exp = Math.min(this.data.exp, this.params.maxExp);
         this.data.energy = Math.min(this.data.energy, this.params.maxEnergy);
@@ -293,19 +303,12 @@ TileEntity.registerPrototype(BlockID.quarry, {
 
         this.params = getDefaultQuarryParams();
         this.toolExtra = new ItemExtraData();
-        this.energyConsumption =
-            ENERGY_CONSUMPTION +
-            this.upgrades.reduce((prev, upgrade) => upgrade.energy > 0 ? upgrade.energy : prev, 0);
+        this.energyConsumption = ENERGY_CONSUMPTION;
     },
 
     isOnTheList(block) {
         const exists = this.list.indexOf(block.id + ":" + block.data) !== -1;
         return this.data.whitelist ? exists : !exists;
-    },
-
-    isCorrectTool(id: number) {
-        const toolData = ToolAPI.getToolData(id);
-        return toolData && toolData.blockMaterials && toolData.blockMaterials["stone"];
     },
 
     validateStructure() {

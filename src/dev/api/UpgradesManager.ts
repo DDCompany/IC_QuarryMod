@@ -62,6 +62,7 @@ class UpgradesManager {
             default:
                 throw "Invalid upgrade type";
         }
+
     }
 
     static getUpgrade(id: number): IUpgradeDesc {

@@ -2,6 +2,10 @@ const FONT = {
     color: android.graphics.Color.rgb(77, 77, 77),
     shadow: 0,
 };
+const FONT_ERROR = {
+    color: android.graphics.Color.rgb(173, 10, 10),
+    shadow: 0,
+};
 
 const gui = new UI.StandartWindow({
     standart: {
@@ -69,11 +73,16 @@ const gui = new UI.StandartWindow({
         "text": {
             type: "text",
             x: 390,
-            y: 320,
+            y: 315,
             text: "",
             font: FONT,
-            format: true,
-            multiline: true,
+        },
+        "textError": {
+            type: "text",
+            x: 390,
+            y: 315,
+            text: "",
+            font: FONT_ERROR,
         },
         "textExp": {type: "text", x: 559, y: 250, font: FONT},
 

@@ -13,5 +13,6 @@ Translation.addTranslation("Interdimensional Core", {ru: "Межпростран
 //UI
 Translation.addTranslation("Range: ", {ru: "Радиус: ", zh: "范围: "});
 Translation.addTranslation("Not enough space", {ru: "Недостаточно места", zh: "范围大小不足"});
+Translation.addTranslation("Not enough energy", {ru: "Недостаточно энергии"});
 Translation.addTranslation("Incorrect structure", {ru: "Неверное строение", zh: "错误的结构"});
 Translation.addTranslation("Turned off", {ru: "Выключено"});

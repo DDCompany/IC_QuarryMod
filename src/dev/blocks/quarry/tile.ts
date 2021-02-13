@@ -178,16 +178,22 @@ TileEntity.registerPrototype(BlockID.quarry, {
             text = Translation.translate("Incorrect structure");
         } else if (this.data.completed) {
             text = Translation.translate("Completed");
-        } else {
-            text = `X: ${this.data.digX} Y: ${this.data.digY} Z: ${this.data.digZ}`;
+        } else if (this.data.energy < this.energyConsumption) {
+            text = Translation.translate("Not enough energy");
         }
-        text += `\nRadius: ${this.params.radius / 16} chunks`;
+
+        if (text) {
+            this.container.setText("text", "");
+            this.container.setText("textError", text);
+        } else {
+            this.container.setText("text", `X: ${this.data.digX} Y: ${this.data.digY} Z: ${this.data.digZ}`);
+            this.container.setText("textError", "");
+        }
 
         this.container.sendEvent("uiData",
             {enabled: this.data.enabled, whitelist: this.data.whitelist});
         this.container.setScale("energyScale", this.data.energy / this.getEnergyStorage());
         this.container.setScale("expScale", this.data.exp / this.params.maxExp);
-        this.container.setText("text", text);
         this.container.setText("textExp", this.data.exp);
         this.container.sendChanges();
     },
@@ -294,7 +300,8 @@ TileEntity.registerPrototype(BlockID.quarry, {
         this.params = getDefaultQuarryParams();
         this.toolExtra = new ItemExtraData();
         this.energyConsumption =
-            ENERGY_CONSUMPTION + this.upgrades.reduce((prev, upgrade) => upgrade.energy > 0 ? upgrade.energy : prev, 0);
+            ENERGY_CONSUMPTION +
+            this.upgrades.reduce((prev, upgrade) => upgrade.energy > 0 ? upgrade.energy : prev, 0);
     },
 
     isOnTheList(block) {

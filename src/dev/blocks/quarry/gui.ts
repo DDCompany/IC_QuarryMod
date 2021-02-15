@@ -88,7 +88,7 @@ const gui = new UI.StandartWindow({
 
         "switch": {
             type: "switch",
-            x: 830,
+            x: 832,
             y: 52,
             scale: 2,
             bitmapOffHover: "quarry_mod.toggle.off_hover",

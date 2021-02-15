@@ -64,6 +64,6 @@ class UpgradesManager {
     }
 
     static isLens(id: number): boolean {
-        return this.upgrades[id]?.type === UpgradeType.MODULE;
+        return this.upgrades[id]?.type === UpgradeType.LENS;
     }
 }

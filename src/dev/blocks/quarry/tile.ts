@@ -77,6 +77,20 @@ TileEntity.registerPrototype(BlockID.quarry, {
         onLoad() {
             this.refreshList();
             this.onUpgradeChanged();
+
+            this.container.setGlobalAddTransferPolicy((container, name, id, amount) => {
+                if (name.startsWith("slotModule")) {
+                    if (!UpgradesManager.isModule(id)) {
+                        return 0;
+                    }
+                } else if (name.startsWith("slotLens")) {
+                    if (!UpgradesManager.isLens(id)) {
+                        return 0;
+                    }
+                }
+
+                return Math.min(amount, Item.getMaxStack(id) - container.getSlot(name).count);
+            });
         },
     },
 

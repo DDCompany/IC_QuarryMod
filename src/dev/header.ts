@@ -9,7 +9,6 @@
  */
 
 IMPORT("EnergyNet");
-IMPORT("ChargeItem");
 // IMPORT("SoundAPI");
 
 const EntityType = Native.EntityType;

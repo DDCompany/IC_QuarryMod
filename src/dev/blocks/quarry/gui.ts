@@ -103,12 +103,6 @@ const gui = new UI.StandartWindow({
     },
 });
 
-Callback.addCallback("PostLoaded", () => {
-    const font = new UI.Font(FONT);
-    alert(font.getTextWidth("BL", gui.getWindow("main").getScale()) + " " +
-        font.getTextWidth("WL", gui.getWindow("main").getScale()));
-});
-
 {
     const elements = gui.getWindow("main").getContent().elements;
 

@@ -302,7 +302,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
 
         this.data.exp = Math.min(this.data.exp, this.params.maxExp);
         this.data.energy = Math.min(this.data.energy, this.params.maxEnergy);
-        // noinspection JSConstantReassignment
         this.upgrades = upgrades;
     },
 

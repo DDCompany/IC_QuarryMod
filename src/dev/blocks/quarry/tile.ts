@@ -45,7 +45,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
         digZ: 0,
         drop: [],
         enabled: true,
-        isValid: false,
+        valid: false,
         whitelist: false,
         completed: false,
     },
@@ -154,7 +154,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
             text = Translation.translate("Turned off");
         } else if (this.data.drop.length) {
             text = Translation.translate("Not enough space");
-        } else if (!this.data.isValid) {
+        } else if (!this.data.valid) {
             text = Translation.translate("Incorrect structure");
         } else if (this.data.completed) {
             text = Translation.translate("Completed");
@@ -213,6 +213,10 @@ TileEntity.registerPrototype(BlockID.quarry, {
         this.container.setScale("expScale", this.data.exp / this.params.maxExp);
         this.container.setText("textExp", this.data.exp);
         this.container.sendChanges();
+    },
+
+    getError() {
+
     },
 
     nextPos() {
@@ -342,7 +346,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
             });
         }
 
-        this.data.isValid = this.casings.length === 6;
+        this.data.valid = this.casings.length === 6;
     },
 
     getEnergyStorage() {

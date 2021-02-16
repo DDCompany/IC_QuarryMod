@@ -46,7 +46,7 @@ TileEntity.registerPrototype(BlockID.quarry, {
         drop: [],
         enabled: true,
         isValid: false,
-        whitelist: true,
+        whitelist: false,
         completed: false,
     },
     casings: [],

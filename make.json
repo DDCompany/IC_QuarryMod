@@ -4,7 +4,7 @@
       "name": "QuarryModPE",
       "description": "Dig, dig, dig!",
       "author": "DDCompany",
-      "version": "release-4.0",
+      "version": "release-4.1",
       "icon": "src/mod_icon.png"
     },
     "api": "CoreEngine"

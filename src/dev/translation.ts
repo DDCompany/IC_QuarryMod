@@ -13,8 +13,12 @@ Translation.addTranslation("Quarry Lens (Enchanted)", {ru: "Линза (Зача
 Translation.addTranslation("Interdimensional Core", {ru: "Межпространственное ядро"});
 
 //UI
-Translation.addTranslation("Range: ", {ru: "Радиус: ", zh: "范围: "});
 Translation.addTranslation("Not enough space", {ru: "Недостаточно места", zh: "范围大小不足"});
 Translation.addTranslation("Not enough energy", {ru: "Недостаточно энергии"});
 Translation.addTranslation("Incorrect structure", {ru: "Неверное строение", zh: "错误的结构"});
 Translation.addTranslation("Turned off", {ru: "Выключено"});
+
+//Tooltip
+Translation.addTranslation("Energy:", {ru: "Энергия:"});
+Translation.addTranslation("Range:", {ru: "Радиус:", zh: "范围: "});
+Translation.addTranslation("Experience:", {ru: "Опыт:"});

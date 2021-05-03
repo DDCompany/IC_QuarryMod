@@ -357,11 +357,41 @@ TileEntity.registerPrototype(BlockID.quarry, {
         return gui;
     },
 
-    destroy() {
+    destroyBlock() {
         for (const casing of this.casings) {
             casing.parent = null;
         }
+
+        const extra = new ItemExtraData();
+        extra.putInt("energy", this.data.energy);
+        extra.putInt("exp", this.data.exp);
+        extra.putSerializable("params", this.params);
+        extra.putSerializable("container", this.container);
+
+        for (const key in this.container.slots) {
+            this.container.clearSlot(key);
+        }
+
+        this.blockSource.spawnDroppedItem(this.x, this.y, this.z, BlockID.quarry, 1, 0, extra);
     },
+});
+
+Block.registerDropFunction("quarry", () => []);
+
+Callback.addCallback("ItemUse", function (coords, item) {
+
+    if (item.id !== BlockID.quarry || !item.extra) {
+        return;
+    }
+
+    const tile = World.getTileEntity(coords.relative.x, coords.relative.y, coords.relative.z) as TileEntity;
+    if (tile && tile.blockID === BlockID.quarry) {
+        const extra = item.extra;
+        alert("set");
+        tile.data.energy = extra.getInt("energy", 0);
+        tile.data.exp = extra.getInt("exp", 0);
+        tile.container = extra.getSerializable("container") as ItemContainer;
+    }
 });
 
 for (const i in energyTypes) {

@@ -2,6 +2,21 @@ IDRegistry.genBlockID("quarry");
 Block.createBlock("quarry", [{name: "Quarry", texture: [["quarry", 0]], inCreative: true}]);
 Block.setBlockMaterial(BlockID.quarry, "stone", 2);
 
+Item.registerNameOverrideFunction(BlockID.quarry, ((item, translation) => {
+    if (item.extra) {
+        const energy = item.extra.getInt("energy", 0);
+        const exp = item.extra.getInt("exp", 0);
+        const params = item.extra.getSerializable("params") as IQuarryParams;
+        return `${translation}\n`
+            + `${Translation.translate("Energy:")} ${Native.Color.GREEN}${energy}/${params.maxEnergy}EU\n`
+            + `${Native.Color.WHITE}${Translation.translate(
+                "Experience:")} ${Native.Color.GREEN}${exp}/${params.maxExp}●\n`
+            + `${Native.Color.WHITE}${Translation.translate("Range:")} ${Native.Color.GREEN}${params.radius}m\n`;
+    }
+
+    return translation;
+}));
+
 Callback.addCallback("PostLoaded", () => {
     if (ModAPI.requireAPI("ICore")) {
         Recipes.addShaped({id: BlockID.quarry, count: 1, data: 0}, [

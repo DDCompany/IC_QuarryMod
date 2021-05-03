@@ -215,10 +215,6 @@ TileEntity.registerPrototype(BlockID.quarry, {
         this.container.sendChanges();
     },
 
-    getError() {
-
-    },
-
     nextPos() {
         if (++this.data.digX > this.data.centerX + 16 + this.params.radius) {
             if (++this.data.digZ > this.data.centerZ + 16 + this.params.radius) {
